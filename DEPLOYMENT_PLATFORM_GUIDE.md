@@ -33,10 +33,50 @@ vercel --prod
 2. Import GitHub repository
 3. Add environment variables:
    ```
-   DATABASE_URL=your-database-url
-   PUTER_API_KEY=your-puter-api-key
-   Z_AI_API_KEY=your-z-ai-api-key
+   # NeonDB (Primary Database)
+   DATABASE_URL=postgresql://neondb_owner:npg_hstMl57UZaBK@ep-wandering-violet-a1ze6nfd-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+   POSTGRES_PRISMA_URL=postgresql://neondb_owner:npg_hstMl57UZaBK@ep-wandering-violet-a1ze6nfd-pooler.ap-southeast-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require
+   
+   # Upstash Redis (Caching & Session Storage)
+   KV_URL=rediss://default:AWKLAAIncDIzZTA1OTIxNDc4YWU0OWE5YTMxMGFjMWFiNmM4MTZjM3AyMjUyMjc@fast-lionfish-25227.upstash.io:6379
+   KV_REST_API_URL=https://fast-lionfish-25227.upstash.io
+   KV_REST_API_TOKEN=AWKLAAIncDIzZTA1OTIxNDc4YWU0OWE5YTMxMGFjMWFiNmM4MTZjM3AyMjUyMjc
+   REDIS_URL=rediss://default:AWKLAAIncDIzZTA1OTIxNDc4YWU0OWE5YTMxMGFjMWFiNmM4MTZjM3AyMjUyMjc@fast-lionfish-25227.upstash.io:6379
+   
+   # Authentication (Generate secure random strings)
+   NEXTAUTH_SECRET=your-random-secret-key
+   NEXTAUTH_URL=https://your-domain.vercel.app
+   
+   # Stack Auth (Optional - if using)
+   NEXT_PUBLIC_STACK_PROJECT_ID=****************************
+   NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=****************************************
+   STACK_SECRET_SERVER_KEY=***********************
    ```
+   
+   **Note:** Puter.js doesn't require API keys - it works client-side automatically!
+
+### 🗄️ **Database & Caching Setup (Configured):**
+
+**✅ NeonDB PostgreSQL (Primary Database)**
+```bash
+# Optimized for Vercel/Prisma with connection pooling
+DATABASE_URL=postgresql://neondb_owner:npg_hstMl57UZaBK@ep-wandering-violet-a1ze6nfd-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+POSTGRES_PRISMA_URL=postgresql://neondb_owner:npg_hstMl57UZaBK@ep-wandering-violet-a1ze6nfd-pooler.ap-southeast-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require
+```
+
+**✅ Upstash Redis (Caching & Sessions)**
+```bash
+# High-performance Redis for API caching and real-time features
+REDIS_URL=rediss://default:AWKLAAIncDIzZTA1OTIxNDc4YWU0OWE5YTMxMGFjMWFiNmM4MTZjM3AyMjUyMjc@fast-lionfish-25227.upstash.io:6379
+KV_REST_API_URL=https://fast-lionfish-25227.upstash.io
+KV_REST_API_TOKEN=AWKLAAIncDIzZTA1OTIxNDc4YWU0OWE5YTMxMGFjMWFiNmM4MTZjM3AyMjUyMjc
+```
+
+**Benefits:**
+- 🚀 **NeonDB:** Serverless PostgreSQL with autoscaling
+- ⚡ **Upstash:** Edge Redis for ultra-fast caching
+- 🔄 **Connection Pooling:** Optimized for serverless environments
+- 🌍 **Global Distribution:** Low latency worldwide
 4. Deploy automatically on push
 
 ---
@@ -89,14 +129,18 @@ npm run export  # Creates static version
 - Convert API routes to Workers
 - Use Cloudflare D1 for database
 
-## 🎯 **Recommended Action**
+## 🎯 **Quick Deploy to Vercel (Pre-configured)**
 
-**Deploy to Vercel** - it's the simplest and most compatible option:
+**Your setup is ready! Follow these steps:**
 
-1. **Create Vercel account** at vercel.com
-2. **Import your GitHub repository**
-3. **Add environment variables** in Vercel dashboard
-4. **Deploy automatically** - no configuration needed!
+1. **Create Vercel account** at [vercel.com](https://vercel.com)
+2. **Import your GitHub repository** (FairForge)
+3. **Copy environment variables** from `.env.example` to Vercel dashboard
+4. **Update these values only:**
+   - `NEXTAUTH_SECRET` → Generate 32-character random string
+   - `NEXTAUTH_URL` → `https://your-app-name.vercel.app`
+   - `NEXT_PUBLIC_APP_URL` → `https://your-app-name.vercel.app`
+5. **Deploy automatically** - everything else is pre-configured!
 
 ## 📊 **Comparison Table**
 

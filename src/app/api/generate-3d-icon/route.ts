@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateImageWithPuterAI, initializePuter, enhancePromptWithPuterAI } from '@/lib/puter-integration'
+import { generateIconWithPuter, initializePuter } from '@/lib/puter-integration'
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,21 +52,19 @@ export async function POST(request: NextRequest) {
     console.log(`Attempting to generate ${maxBatchSize} variations...`)
 
     if (puterInitialized) {
-      // Enhance the prompt with Puter AI
-      try {
-        const enhancedWithAI = await enhancePromptWithPuterAI(enhancedPrompt, style.split(',')[0])
-        console.log('🎯 Prompt enhanced with Puter AI')
-      } catch (enhanceError) {
-        console.warn('⚠️ Prompt enhancement failed, using original prompt')
-      }
+      console.log('🎯 Using enhanced prompt with Puter.js');
 
       for (let i = 0; i < maxBatchSize; i++) {
         try {
           const variationPrompt = i === 0 ? enhancedPrompt : `${enhancedPrompt}. Variation ${i + 1} with subtle differences.`
 
-          console.log(`🎨 Generating variation ${i + 1}/${maxBatchSize} with Puter AI...`)
+          console.log(`🎨 Generating variation ${i + 1}/${maxBatchSize} with Puter.js...`)
 
-          const imageElement = await generateImageWithPuterAI(variationPrompt, true) // testMode = true
+          const imageElement = await generateIconWithPuter({
+            prompt: variationPrompt,
+            style: '3d',
+            size: '512x512'
+          });
 
           if (imageElement && imageElement.src) {
             variations.push(imageElement.src)

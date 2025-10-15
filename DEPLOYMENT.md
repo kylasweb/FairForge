@@ -65,11 +65,12 @@ netlify deploy --prod --dir=.next
 ## Environment Variables Needed
 ```env
 DATABASE_URL=your-database-url
-PUTER_API_KEY=your-puter-api-key
 Z_AI_API_KEY=your-z-ai-api-key
 NEXTAUTH_SECRET=your-nextauth-secret
 NEXTAUTH_URL=your-production-url
 ```
+
+**Note:** Puter.js works client-side without API keys!
 
 ## Next Steps
 1. **For Cloudflare:** Run `npm install` then `npm run pages:deploy`

@@ -38,11 +38,12 @@ railway up
 ## 🔧 Environment Variables Needed
 ```env
 DATABASE_URL=your-database-connection-string
-PUTER_API_KEY=your-puter-api-key
 Z_AI_API_KEY=your-z-ai-api-key
 NEXTAUTH_SECRET=your-random-secret-key
 NEXTAUTH_URL=https://your-domain.com
 ```
+
+**Note:** Puter.js works client-side automatically - no API keys needed!
 
 ## 📊 Build Performance
 - **Build Time:** ~9 seconds

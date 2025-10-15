@@ -9,11 +9,12 @@
    Add these in Vercel Dashboard → Settings → Environment Variables:
    ```
    DATABASE_URL=your-database-url
-   PUTER_API_KEY=your-puter-api-key
    Z_AI_API_KEY=your-z-ai-api-key
    NEXTAUTH_SECRET=your-nextauth-secret
    NEXTAUTH_URL=https://your-app.vercel.app
    ```
+   
+   **Note:** Puter.js doesn't need API keys - it works automatically!
 
 3. **Deploy:**
    - Push to GitHub main branch
@@ -37,6 +38,8 @@
 3. **Set Environment Variables:**
    ```bash
    railway variables set DATABASE_URL=your-database-url
-   railway variables set PUTER_API_KEY=your-puter-api-key
    railway variables set Z_AI_API_KEY=your-z-ai-api-key
+   railway variables set NEXTAUTH_SECRET=your-random-secret
    ```
+   
+   **Note:** Puter.js is client-side only - no server configuration needed!

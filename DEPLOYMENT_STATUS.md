@@ -15,12 +15,15 @@
 2. **Sign in with GitHub**
 3. **Click "Import Project"**
 4. **Select your FairForge repository**
-5. **Add environment variables:**
+4. **Add environment variables:**
    ```
    DATABASE_URL=your-database-url
-   PUTER_API_KEY=your-puter-api-key
    Z_AI_API_KEY=your-z-ai-api-key
+   NEXTAUTH_SECRET=your-random-secret
+   NEXTAUTH_URL=https://your-domain.vercel.app
    ```
+   
+   **Note:** Puter.js is client-side only - no server configuration required!
 6. **Click Deploy**
 
 **Result:** Your app will be live at `https://fairforge.vercel.app`

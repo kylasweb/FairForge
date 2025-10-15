@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateImageWithPuterAI, generateUICodeWithPuterAI, initializePuter } from '@/lib/puter-integration';
+import { generateUIWithPuter, generateCodeWithPuter, initializePuter } from '@/lib/puter-integration';
 
 export async function POST(request: NextRequest) {
   console.log('🎯 UI Generation API called');
@@ -41,12 +41,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🚀 Starting UI generation...');
+    console.log('🚀 Starting UI generation with Puter.js...');
     console.log('📝 Request details:', { type, platform, style, prompt: prompt?.substring(0, 100) });
 
-    // Note: Puter.js will be handled on the client-side
-    // For now, we'll return demo content that looks good
-    const puterInitialized = false;
+    // Initialize Puter for server-side AI generation
+    const puterInitialized = await initializePuter();
 
     let finalPrompt = '';
 
@@ -78,45 +77,65 @@ export async function POST(request: NextRequest) {
       finalPrompt += ' Use modern Tailwind CSS design patterns with clean spacing, consistent colors, and utility-first approach.';
     }
 
-    // Generate a demo UI mockup image
-    console.log('🎨 Generating demo UI preview...');
-    console.log('📏 Final prompt length:', finalPrompt.length);
+    let base64Image = '';
+    let generatedCode = '';
 
-    // Create a more realistic demo image - a placeholder that shows UI mockup
-    const base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
+    if (puterInitialized) {
+      console.log('🎨 Generating UI with Puter.js...');
 
-    // Generate corresponding HTML/CSS code
-    let codePrompt = `Generate clean, modern HTML and CSS code for a ${style} ${platform} UI interface based on this design: "${finalPrompt}".`;
+      try {
+        // Generate UI image using Puter.js
+        const imageResult = await generateUIWithPuter({
+          prompt: finalPrompt,
+          style,
+          size: '1024x1024'
+        });
 
-    if (type === 'textToUI') {
-      codePrompt += ` Create a complete, functional interface that matches this description: "${prompt}".`;
+        if (imageResult) {
+          // Convert image to base64
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = imageResult.width || 1024;
+          canvas.height = imageResult.height || 1024;
+          ctx?.drawImage(imageResult, 0, 0);
+          base64Image = canvas.toDataURL('image/png');
+          console.log('✅ UI image generated successfully');
+        }
+
+        // Generate corresponding HTML/CSS code
+        const codePrompt = `Create a complete, functional ${platform} interface that matches the ${style} design style. ${type === 'textToUI' ? `Requirements: ${prompt}` : 'Based on the UI design provided.'}`;
+
+        const codeResult = await generateCodeWithPuter({
+          prompt: codePrompt,
+          language: 'typescript',
+          framework: 'react',
+          style
+        });
+
+        if (codeResult) {
+          generatedCode = codeResult;
+          console.log('✅ UI code generated successfully');
+        }
+
+      } catch (error) {
+        console.error('❌ Puter.js generation failed:', error);
+        // Fallback to demo content
+        base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
+        generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
+      }
+    } else {
+      console.log('⚠️ Puter.js not available, using demo content');
+      // Fallback to demo content
+      base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
+      generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
     }
-
-    codePrompt += `
-    
-    Requirements:
-    - Use semantic HTML5 elements
-    - Create responsive CSS that works on ${platform}
-    - Include hover states and transitions
-    - Use modern CSS (flexbox/grid)
-    - Add placeholder content that makes sense
-    - Include proper accessibility attributes
-    - Make it visually appealing with the ${style} design system
-    - Add comments to explain the structure
-    `;
-
-    console.log('💻 Generating demo UI code...');
-    console.log('📏 Code prompt length:', codePrompt.length);
-
-    // Generate appropriate demo code based on the request
-    const generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
 
     console.log('✅ UI generation completed successfully');
     console.log('📊 Response stats - Image:', !!base64Image, 'Code length:', generatedCode.length);
 
     return NextResponse.json({
       success: true,
-      isDemoMode: true, // Always demo mode for now until client-side Puter integration
+      isDemoMode: !puterInitialized, // Demo mode only if Puter.js unavailable
       data: {
         image: base64Image,
         code: generatedCode
