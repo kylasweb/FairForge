@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateImageWithPuterAI, generateUICodeWithPuterAI, initializePuter } from '@/lib/puter-integration';
 
 export async function POST(request: NextRequest) {
+  console.log('🎯 UI Generation API called');
+
   try {
     const body = await request.json();
     const { type, platform, style, prompt, imageData, url } = body;
 
+    console.log('📝 Request data:', {
+      type,
+      platform,
+      style,
+      hasPrompt: !!prompt,
+      hasImageData: !!imageData,
+      hasUrl: !!url
+    });
+
     if (!type || !platform || !style) {
+      console.log('❌ Missing required fields:', { type, platform, style });
       return NextResponse.json(
         { error: 'Missing required fields: type, platform, style' },
         { status: 400 }
@@ -14,6 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === 'textToUI' && !prompt) {
+      console.log('❌ Missing prompt for textToUI generation');
       return NextResponse.json(
         { error: 'Prompt is required for text-to-UI generation' },
         { status: 400 }
@@ -21,6 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     if ((type === 'wireframeToUI' || type === 'screenshotToUI') && !imageData && !url) {
+      console.log('❌ Missing image data/URL for image-to-UI generation');
       return NextResponse.json(
         { error: 'Either image data or URL is required for this generation type' },
         { status: 400 }
@@ -384,7 +398,7 @@ function generateDemoUIImage(style: string, platform: string, type: string, prom
             </div>`).join('')}
         </div>
         <div class="footer">
-            <p>Generated with DesignForge AI • Powered by Puter.js</p>
+            <p>Generated with FairForge • Powered by Puter.js</p>
             <small>Prompt: "${prompt.slice(0, 100)}${prompt.length > 100 ? '...' : ''}"</small>
         </div>
     </div>

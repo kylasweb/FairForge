@@ -245,7 +245,7 @@ const industryOptions = [
   { value: 'ai', label: 'AI & Machine Learning' }
 ]
 
-export default function DesignForgeAI() {
+export default function FairForge() {
   const [mode, setMode] = useState<'icon' | 'logo' | 'ui' | 'architect'>('icon')
   const [selectedStyle, setSelectedStyle] = useState('minimalist')
   const [selectedStyles, setSelectedStyles] = useState<string[]>(['minimalist']) // For composable styles
@@ -662,8 +662,14 @@ export default function DesignForgeAI() {
   }
 
   const generateUI = async () => {
-    if (!uiPrompt.trim() && !uploadedImage && !urlInput.trim()) {
-      toast.error('Please provide a description, upload an image, or enter a URL')
+    // Validate inputs based on generation type
+    if (uiGenerationType === 'textToUI' && !uiPrompt.trim()) {
+      toast.error('Please provide a description for text-to-UI generation')
+      return
+    }
+
+    if ((uiGenerationType === 'wireframeToUI' || uiGenerationType === 'screenshotToUI') && !uploadedImage && !urlInput.trim()) {
+      toast.error('Please upload an image or enter a URL for image-to-UI generation')
       return
     }
 
@@ -1030,7 +1036,7 @@ Avoid: low quality, amateur, rushed, unclear, generic`
             <div className="flex items-center gap-2">
               <Box className="h-8 w-8 text-purple-600" />
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                DesignForge AI
+                FairForge
               </h1>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
                 Powered by Puter.js
@@ -1811,7 +1817,10 @@ Avoid: low quality, amateur, rushed, unclear, generic`
 
                   <Button
                     onClick={generateUI}
-                    disabled={isGenerating || (!uiPrompt.trim() && !uploadedImage && !urlInput.trim())}
+                    disabled={isGenerating ||
+                      (uiGenerationType === 'textToUI' && !uiPrompt.trim()) ||
+                      ((uiGenerationType === 'wireframeToUI' || uiGenerationType === 'screenshotToUI') && !uploadedImage && !urlInput.trim())
+                    }
                     className="w-full"
                   >
                     {isGenerating ? (

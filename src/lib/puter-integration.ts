@@ -1,5 +1,5 @@
 /**
- * Puter.js Integration for DesignForge AI
+ * Puter.js Integration for FairForge
  * This module handles the integration with Puter.js for enhanced functionality
  */
 

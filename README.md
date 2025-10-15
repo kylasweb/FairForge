@@ -1,4 +1,4 @@
-# DesignForge AI
+# FairForge
 
 A powerful AI-powered design studio built with Next.js 15, TypeScript, and Puter.js integration. Forge stunning 3D icons, professional logos, and complete UI designs from text descriptions with multiple style options, industry-specific templates, and cloud storage capabilities.
 
@@ -69,7 +69,7 @@ A powerful AI-powered design studio built with Next.js 15, TypeScript, and Puter
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd designforge-ai
+cd fairforge
 ```
 
 2. Install dependencies:

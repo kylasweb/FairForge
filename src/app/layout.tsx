@@ -14,23 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DesignForge AI - Professional 3D Icon & Logo Generator",
-  description: "Professional AI-powered 3D icon and logo generator with batch generation, guided prompt builder, advanced editing tools, and vector export. Create stunning designs with multiple variations.",
-  keywords: ["3D icons", "AI logo generator", "batch generation", "vector export", "professional design", "AI art", "logo design", "icon generator"],
-  authors: [{ name: "DesignForge AI" }],
+  title: "FairForge - Professional 3D Icon & Logo Generator",
+  description: "Create stunning 3D icons, logos, and UI designs with AI-powered tools. Professional design studio for modern creators.",
+  keywords: "AI design, 3D icons, logo generator, UI design, graphic design, brand identity",
+  authors: [{ name: "FairForge" }],
   openGraph: {
-    title: "DesignForge AI - Professional Design Studio",
-    description: "Professional AI design tools with batch generation and advanced editing",
-    url: "https://chat.z.ai",
-    siteName: "DesignForge AI",
+    title: "FairForge - Professional Design Studio",
+    description: "Create stunning 3D icons, logos, and UI designs with AI-powered tools.",
     type: "website",
+    siteName: "FairForge",
   },
   twitter: {
     card: "summary_large_image",
-    title: "DesignForge AI - Professional Design Studio",
-    description: "Professional AI design tools with batch generation and advanced editing",
+    title: "FairForge - Professional Design Studio",
+    description: "Create stunning 3D icons, logos, and UI designs with AI-powered tools.",
   },
-};
+}
 
 export default function RootLayout({
   children,
