@@ -1,24 +1,10 @@
+# Cloudflare Pages Configuration for FairForge
 name = "fairforge"
 compatibility_date = "2025-10-15"
-compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "out"
 
-[build]
-command = "npm run pages:build"
-
-[[pages_build_output_dir]]
-directory = ".vercel/output/static"
-
-[env.production.vars]
-NODE_ENV = "production"
-
-# Environment variables (add your actual values)
-[env.production]
-# DATABASE_URL = "your-database-url"
-# PUTER_API_KEY = "your-puter-api-key"
-# Z_AI_API_KEY = "your-z-ai-api-key"
-
-# For development
-[env.preview]
-# DATABASE_URL = "your-dev-database-url"
-# PUTER_API_KEY = "your-dev-puter-api-key"
-# Z_AI_API_KEY = "your-dev-z-ai-api-key"
+# Note: This configuration is for static deployment only
+# FairForge requires server-side API routes which work better on:
+# - Vercel (recommended for Next.js)
+# - Railway (full-stack apps)
+# - Netlify (with functions)
