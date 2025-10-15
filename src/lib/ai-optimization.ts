@@ -3,7 +3,13 @@
  * Implements caching, queue management, and failover strategies
  */
 
-import { Redis } from 'ioredis'
+// Optional Redis import - fallback to memory cache if not available
+let Redis: any = null
+try {
+    Redis = require('ioredis').Redis
+} catch (error) {
+    console.log('Redis not available, using memory cache')
+}
 
 interface AIRequest {
     id: string
@@ -23,25 +29,55 @@ interface AIResponse {
 }
 
 export class AIOptimizer {
-    private redis: Redis
+    private redis: any
     private requestQueue: AIRequest[] = []
     private processing = false
+    private memoryCache = new Map<string, any>()
 
     constructor() {
-        this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+        if (Redis) {
+            try {
+                this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+            } catch (error) {
+                console.log('Redis connection failed, using memory cache')
+                this.redis = null
+            }
+        }
     }
 
     // Cache AI results for similar requests
     async getCachedResult(prompt: string, style: string, platform: string): Promise<AIResponse | null> {
         const cacheKey = `ai:${this.hashRequest(prompt, style, platform)}`
-        const cached = await this.redis.get(cacheKey)
-        return cached ? JSON.parse(cached) : null
+
+        if (this.redis) {
+            try {
+                const cached = await this.redis.get(cacheKey)
+                return cached ? JSON.parse(cached) : null
+            } catch (error) {
+                console.log('Redis get error, using memory cache')
+            }
+        }
+
+        // Fallback to memory cache
+        const cached = this.memoryCache.get(cacheKey)
+        return cached || null
     }
 
     async cacheResult(prompt: string, style: string, platform: string, result: AIResponse): Promise<void> {
         const cacheKey = `ai:${this.hashRequest(prompt, style, platform)}`
-        // Cache for 24 hours
-        await this.redis.setex(cacheKey, 86400, JSON.stringify(result))
+
+        if (this.redis) {
+            try {
+                // Cache for 24 hours
+                await this.redis.setex(cacheKey, 86400, JSON.stringify(result))
+                return
+            } catch (error) {
+                console.log('Redis set error, using memory cache')
+            }
+        }
+
+        // Fallback to memory cache
+        this.memoryCache.set(cacheKey, result)
     }
 
     // Queue management for AI requests

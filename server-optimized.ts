@@ -65,19 +65,24 @@ async function startServer() {
         pingInterval: 25000
     })
 
-    // Redis adapter for horizontal scaling
+    // Redis adapter for horizontal scaling (optional)
     if (!dev && process.env.REDIS_URL) {
-        const { createAdapter } = await import('@socket.io/redis-adapter')
-        const { createClient } = await import('redis')
+        try {
+            // Use require() to avoid TypeScript import errors
+            const redisAdapter = require('@socket.io/redis-adapter')
+            const redis = require('redis')
 
-        const pubClient = createClient({ url: process.env.REDIS_URL })
-        const subClient = pubClient.duplicate()
+            const pubClient = redis.createClient({ url: process.env.REDIS_URL })
+            const subClient = pubClient.duplicate()
 
-        await Promise.all([pubClient.connect(), subClient.connect()])
-        io.adapter(createAdapter(pubClient, subClient))
-    }
+            await Promise.all([pubClient.connect(), subClient.connect()])
+            io.adapter(redisAdapter.createAdapter(pubClient, subClient))
 
-    const PORT = parseInt(process.env.PORT || '3000', 10)
+            console.log('✅ Redis adapter connected for horizontal scaling')
+        } catch (error) {
+            console.log('⚠️ Redis adapter not available, using default Socket.IO configuration')
+        }
+    } const PORT = parseInt(process.env.PORT || '3000', 10)
 
     server.listen(PORT, (err?: any) => {
         if (err) throw err
