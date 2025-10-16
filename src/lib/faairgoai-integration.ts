@@ -9,8 +9,7 @@ import {
     generateWithOpenRouter,
     generateWithGrok,
     generateWithPerplexity,
-    generateWithHuggingFace,
-    generateWithOpenAI
+    generateWithHuggingFace
 } from './ai-providers';
 
 declare global {
@@ -160,8 +159,7 @@ async function generateWithFallback(prompt: string, type: 'icon' | 'logo' | 'ui'
         { name: 'OpenRouter', func: generateWithOpenRouter },
         { name: 'Grok', func: generateWithGrok },
         { name: 'Perplexity', func: generateWithPerplexity },
-        { name: 'HuggingFace', func: generateWithHuggingFace },
-        { name: 'OpenAI', func: generateWithOpenAI }
+        { name: 'HuggingFace', func: generateWithHuggingFace }
     ];
 
     for (const provider of providers) {
