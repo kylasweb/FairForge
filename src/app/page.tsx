@@ -258,6 +258,9 @@ export default function FairForge() {
   const [generatedIcon, setGeneratedIcon] = useState<string | null>(null)
   const [generatedVariations, setGeneratedVariations] = useState<string[]>([])
 
+  // FaairgoAI connection status
+  const [faairgoAIStatus, setFaairgoAIStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
+
   // Enhanced features state
   const [selectedQuality, setSelectedQuality] = useState<'low' | 'medium' | 'high' | 'hd'>('medium')
   const [streamingEnabled, setStreamingEnabled] = useState(false)
@@ -310,13 +313,20 @@ export default function FairForge() {
   // Initialize FaairgoAI on component mount
   useEffect(() => {
     const initFaairgoAI = async () => {
+      setFaairgoAIStatus('checking')
       const initialized = await initializeFaairgoAI()
       setFaairgoAIInitialized(initialized)
+      setFaairgoAIStatus(initialized ? 'connected' : 'disconnected')
+
       if (initialized) {
         setFaairgoAIAuthStatus(getFaairgoAIAuthStatus())
         if (getFaairgoAIAuthStatus()) {
           loadFaairgoAIFiles()
         }
+      } else {
+        toast.info('FaairgoAI service is temporarily unavailable. Using placeholder mode for demos.', {
+          duration: 5000,
+        })
       }
     }
     initFaairgoAI()
@@ -1327,7 +1337,12 @@ Avoid: low quality, amateur, rushed, unclear, generic`
 
             {/* FaairgoAI Integration Status */}
             <div className="flex items-center gap-2">
-              {faairgoAIInitialized ? (
+              {faairgoAIStatus === 'checking' ? (
+                <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Checking FaairgoAI...
+                </Badge>
+              ) : faairgoAIStatus === 'connected' ? (
                 <div className="flex items-center gap-2">
                   {faairgoAIAuthStatus ? (
                     <>
@@ -1348,9 +1363,9 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                   )}
                 </div>
               ) : (
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800">
                   <CloudOff className="h-3 w-3 mr-1" />
-                  FaairgoAI Unavailable
+                  Demo Mode (Service Unavailable)
                 </Badge>
               )}
             </div>
