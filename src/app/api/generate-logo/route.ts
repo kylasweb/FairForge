@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateLogoWithPuterAI, initializePuter } from '@/lib/puter-integration'
+import { generateLogoWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       negativePrompt,
       keywords,
       preferredColors,
-      batchSize = 4
+      batchSize = 4,
+      model = 'gpt-4'
     } = await request.json()
 
     if (!prompt && !companyName) {
@@ -71,12 +72,12 @@ export async function POST(request: NextRequest) {
     enhancedPrompt += ' The logo should be scalable, memorable, professional, suitable for business branding, with a clean background.'
 
     // Initialize Puter
-    let puterInitialized = false
+    let faairgoAIInitialized = false
     try {
-      puterInitialized = await initializePuter()
-      console.log('✅ Puter initialized successfully')
+      faairgoAIInitialized = await initializeFaairgoAI()
+      console.log('✅ FaairgoAI initialized successfully')
     } catch (initError) {
-      console.error('❌ Puter initialization failed:', initError)
+      console.error('❌ FaairgoAI initialization failed:', initError)
     }
 
     // Generate multiple variations with better error handling
@@ -85,14 +86,14 @@ export async function POST(request: NextRequest) {
 
     console.log(`Attempting to generate ${maxBatchSize} logo variations...`)
 
-    if (puterInitialized) {
+    if (faairgoAIInitialized) {
       for (let i = 0; i < maxBatchSize; i++) {
         try {
           const variationPrompt = i === 0 ? enhancedPrompt : `${enhancedPrompt}. Variation ${i + 1} with subtle differences.`
 
-          console.log(`🎨 Generating logo variation ${i + 1}/${maxBatchSize} with Puter AI...`)
+          console.log(`🎨 Generating logo variation ${i + 1}/${maxBatchSize} with FaairgoAI AI...`)
 
-          const imageElement = await generateLogoWithPuterAI(variationPrompt, style.split(',')[0], true) // testMode = true
+          const imageElement = await generateLogoWithFaairgoAI(variationPrompt, style.split(',')[0], true, model) // testMode = true
 
           if (imageElement && imageElement.src) {
             variations.push(imageElement.src)
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      console.warn('⚠️ Puter not initialized, generating demo logo variations')
+      console.warn('⚠️ FaairgoAI not initialized, generating demo logo variations')
       // Generate demo placeholders
       for (let i = 0; i < maxBatchSize; i++) {
         variations.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77PA==')
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      isDemoMode: !puterInitialized,
+      isDemoMode: !faairgoAIInitialized,
       variations: variations,
       prompt: enhancedPrompt,
       requestedCount: maxBatchSize,

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateIconWithPuter, initializePuter } from '@/lib/puter-integration'
+import { generateIconWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, style, negativePrompt, batchSize = 4 } = await request.json()
+    const { prompt, style, negativePrompt, batchSize = 4, model = 'gpt-4' } = await request.json()
 
     if (!prompt) {
       return NextResponse.json(
@@ -37,12 +37,12 @@ export async function POST(request: NextRequest) {
       : basePrompt
 
     // Initialize Puter
-    let puterInitialized = false
+    let faairgoAIInitialized = false
     try {
-      puterInitialized = await initializePuter()
-      console.log('✅ Puter initialized successfully')
+      faairgoAIInitialized = await initializeFaairgoAI()
+      console.log('✅ FaairgoAI initialized successfully')
     } catch (initError) {
-      console.error('❌ Puter initialization failed:', initError)
+      console.error('❌ FaairgoAI initialization failed:', initError)
     }
 
     // Generate multiple variations with better error handling
@@ -51,19 +51,20 @@ export async function POST(request: NextRequest) {
 
     console.log(`Attempting to generate ${maxBatchSize} variations...`)
 
-    if (puterInitialized) {
-      console.log('🎯 Using enhanced prompt with Puter.js');
+    if (faairgoAIInitialized) {
+      console.log('🎯 Using enhanced prompt with FaairgoAI');
 
       for (let i = 0; i < maxBatchSize; i++) {
         try {
           const variationPrompt = i === 0 ? enhancedPrompt : `${enhancedPrompt}. Variation ${i + 1} with subtle differences.`
 
-          console.log(`🎨 Generating variation ${i + 1}/${maxBatchSize} with Puter.js...`)
+          console.log(`🎨 Generating variation ${i + 1}/${maxBatchSize} with FaairgoAI...`)
 
-          const imageElement = await generateIconWithPuter({
+          const imageElement = await generateIconWithFaairgoAI({
             prompt: variationPrompt,
             style: '3d',
-            size: '512x512'
+            size: '512x512',
+            model: model
           });
 
           if (imageElement && imageElement.src) {
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      console.warn('⚠️ Puter not initialized, generating demo variations')
+      console.warn('⚠️ FaairgoAI not initialized, generating demo variations')
       // Generate demo placeholders
       for (let i = 0; i < maxBatchSize; i++) {
         variations.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77PA==')
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      isDemoMode: !puterInitialized,
+      isDemoMode: !faairgoAIInitialized,
       variations: variations,
       prompt: enhancedPrompt,
       requestedCount: maxBatchSize,

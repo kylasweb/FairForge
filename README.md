@@ -1,6 +1,6 @@
 # FairForge
 
-A powerful AI-powered design studio built with Next.js 15, TypeScript, and Puter.js integration. Forge stunning 3D icons, professional logos, and complete UI designs from text descriptions with multiple style options, industry-specific templates, and cloud storage capabilities.
+A powerful AI-powered design studio built with Next.js 15, TypeScript, and FaairgoAI integration. Forge stunning 3D icons, professional logos, and complete UI designs from text descriptions with multiple style options, industry-specific templates, and cloud storage capabilities.
 
 ## Features
 
@@ -23,9 +23,9 @@ A powerful AI-powered design studio built with Next.js 15, TypeScript, and Puter
 - IT & Technology: Servers, cloud computing, cybersecurity, APIs, coding, networks
 - Medical & Healthcare: Medical crosses, DNA, pharmaceutical equipment, hospitals
 - Hospitality: Hotels, restaurants, spas, concierge services
-- AI & Machine Learning: Neural networks, robots, machine learning, computer vision
+- AI & Machine Learning: Neural networks, robots, machine learning, comFaairgoAI vision
 
-### ☁️ **Puter.js Integration**
+### ☁️ **FaairgoAI Integration**
 - Cloud storage for generated icons and logos
 - Authentication and file management
 - Seamless save and retrieve functionality
@@ -53,7 +53,7 @@ A powerful AI-powered design studio built with Next.js 15, TypeScript, and Puter
 - **UI Components**: shadcn/ui (New York style)
 - **Icons**: Lucide React
 - **AI Integration**: ZAI Web Dev SDK
-- **Cloud Storage**: Puter.js
+- **Cloud Storage**: FaairgoAI
 - **Notifications**: Sonner
 - **State Management**: React Hooks
 
@@ -93,7 +93,7 @@ npm run dev
 3. **Select Style**: Choose from 8 different icon styles
 4. **Choose Template**: Select from pre-designed templates or create custom prompts
 5. **Generate**: Click "Generate 3D Icon" to create your icon
-6. **Download or Save**: Download locally or save to Puter cloud storage
+6. **Download or Save**: Download locally or save to FaairgoAI cloud storage
 
 ### Logo Generation
 
@@ -103,14 +103,14 @@ npm run dev
 4. **Select Logo Style**: Choose from 8 professional logo styles
 5. **Choose Template**: Select from industry-specific logo templates
 6. **Generate**: Click "Generate Logo" to create your professional logo
-7. **Download or Save**: Download locally or save to Puter cloud storage
+7. **Download or Save**: Download locally or save to FaairgoAI cloud storage
 
-### Puter.js Integration
+### FaairgoAI Integration
 
-1. **Connect to Puter**: Click "Connect Puter" in the top-right corner
-2. **Sign In**: Authenticate with your Puter account
-3. **Save Creations**: Use "Save to Puter" button to store in the cloud
-4. **Manage Files**: View and access saved files in the "Puter Files" tab
+1. **Connect to FaairgoAI**: Click "Connect FaairgoAI" in the top-right corner
+2. **Sign In**: Authenticate with your FaairgoAI account
+3. **Save Creations**: Use "Save to FaairgoAI" button to store in the cloud
+4. **Manage Files**: View and access saved files in the "FaairgoAI Files" tab
 
 ### Style Guide
 
@@ -196,7 +196,7 @@ src/
 ├── components/
 │   └── ui/                       # shadcn/ui components
 ├── lib/
-│   └── puter-integration.ts      # Puter.js integration utilities
+│   └── FaairgoAI-integration.ts      # FaairgoAI integration utilities
 └── hooks/
     └── use-toast.ts              # Toast notification hook
 ```
@@ -218,7 +218,7 @@ src/
 
 No environment variables required for basic functionality. The application uses:
 - ZAI Web Dev SDK for AI generation
-- Puter.js for cloud storage (loaded dynamically)
+- FaairgoAI for cloud storage (loaded dynamically)
 
 ### Customization
 
@@ -244,13 +244,13 @@ This project is licensed under the MIT License.
 ## Support
 
 For issues and questions:
-- Check the [Puter.js Documentation](https://docs.puter.com)
+- Check the [FaairgoAI Documentation](https://docs.FaairgoAI.com)
 - Review the [Next.js Documentation](https://nextjs.org/docs)
 - Open an issue in the repository
 
 ## Acknowledgments
 
-- [Puter.js](https://puter.com) for cloud storage integration
+- [FaairgoAI](https://FaairgoAI.com) for cloud storage integration
 - [ZAI Web Dev SDK](https://z.ai) for AI generation capabilities
 - [shadcn/ui](https://ui.shadcn.com) for beautiful UI components
 - [Tailwind CSS](https://tailwindcss.com) for styling

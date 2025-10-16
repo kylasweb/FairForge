@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { remixImageWithPuter, initializePuter } from '@/lib/puter-integration'
+import { remixImageWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,16 +14,16 @@ export async function POST(request: NextRequest) {
 
     console.log('🎨 Remix request received:', { imageUrl, prompt, negativePrompt, strength })
 
-    // Initialize Puter.js
-    const puterInitialized = await initializePuter()
+    // Initialize FaairgoAI
+    const faairgoAIInitialized = await initializeFaairgoAI()
 
-    if (!puterInitialized) {
-      console.warn('⚠️ Puter.js not available, using demo mode')
+    if (!faairgoAIInitialized) {
+      console.warn('⚠️ FaairgoAI not available, using demo mode')
 
       return NextResponse.json({
         success: true,
         isDemoMode: true,
-        message: 'Image remix - Demo Mode (Puter.js not available)',
+        message: 'Image remix - Demo Mode (FaairgoAI not available)',
         data: {
           variations: [
             'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
           originalImageUrl: imageUrl,
           prompt: prompt || 'creative remix',
           metadata: {
-            model: 'puter-demo',
+            model: 'faairgoai-demo',
             style: 'remix',
             processing_time: 1.2
           }
@@ -42,26 +42,26 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Generate remixed images using Puter.js
+    // Generate remixed images using FaairgoAI
     const variations: string[] = []
     const remixStyle = prompt || 'creative variation'
 
     try {
-      console.log('🚀 Starting image remix with Puter.js...')
+      console.log('🚀 Starting image remix with FaairgoAI...')
 
-      // Fetch the original image to pass to Puter.js
+      // Fetch the original image to pass to FaairgoAI
       const imageResponse = await fetch(imageUrl)
       const imageBlob = await imageResponse.blob()
       const imageBase64 = await blobToBase64(imageBlob)
 
-      // Generate 4 variations using Puter.js
+      // Generate 4 variations using FaairgoAI
       for (let i = 0; i < 4; i++) {
         try {
           const variationStyle = i === 0 ? remixStyle : `${remixStyle} variation ${i + 1}`
 
           console.log(`🎨 Generating variation ${i + 1}/4...`)
 
-          const remixedImage = await remixImageWithPuter(imageBase64, variationStyle)
+          const remixedImage = await remixImageWithFaairgoAI(imageBase64, variationStyle)
 
           if (remixedImage && remixedImage.src) {
             variations.push(remixedImage.src)
@@ -84,13 +84,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         isDemoMode: false,
-        message: 'Image remix completed with Puter.js',
+        message: 'Image remix completed with FaairgoAI',
         data: {
           variations,
           originalImageUrl: imageUrl,
           prompt: remixStyle,
           metadata: {
-            model: 'puter-ai',
+            model: 'faairgoai-ai',
             style: 'remix',
             processing_time: 2.5,
             variations_generated: variations.length
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (error) {
-      console.error('❌ Puter.js remix failed:', error)
+      console.error('❌ FaairgoAI remix failed:', error)
 
       return NextResponse.json({
         success: true,

@@ -53,7 +53,7 @@ vercel --prod
    STACK_SECRET_SERVER_KEY=***********************
    ```
    
-   **Note:** Puter.js doesn't require API keys - it works client-side automatically!
+   **Note:** FaairgoAI doesn't require API keys - it works client-side automatically!
 
 ### 🗄️ **Database & Caching Setup (Configured):**
 

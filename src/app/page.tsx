@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, Download, Sparkles, Box, Palette, Zap, Cloud, CloudOff, User, LogOut, PenTool, RefreshCw, Eraser, Expand, Wand2, Settings, Trash2, Edit3, Layers, Grid3x3, Monitor, Smartphone, Tablet, Upload, Code, FileText, Bug, Camera, Archive } from 'lucide-react'
 import { toast } from 'sonner'
-import { initializePuter, saveIconToPuter, getPuterFiles, getPuterAuthStatus, signInToPuter, signOutFromPuter, type PuterFile } from '@/lib/puter-integration'
+import { initializeFaairgoAI, saveIconToFaairgoAI, getFaairgoAIFiles, getFaairgoAIAuthStatus, signInToFaairgoAI, signOutFromFaairgoAI, type FaairgoAIFile } from '@/lib/faairgoai-integration'
 import JSZip from 'jszip'
 
 // UI/UX Generation Templates
@@ -250,6 +250,7 @@ export default function FairForge() {
   const [selectedStyle, setSelectedStyle] = useState('minimalist')
   const [selectedStyles, setSelectedStyles] = useState<string[]>(['minimalist']) // For composable styles
   const [selectedIndustry, setSelectedIndustry] = useState('general')
+  const [selectedModel, setSelectedModel] = useState<'gpt-4' | 'gpt-5-nano' | 'claude' | 'gemini'>('gpt-4')
   const [customPrompt, setCustomPrompt] = useState('')
   const [negativePrompt, setNegativePrompt] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
@@ -292,88 +293,88 @@ export default function FairForge() {
   const [editMode, setEditMode] = useState<'none' | 'inpaint' | 'outpaint'>('none')
   const [batchSize, setBatchSize] = useState(4)
 
-  // Puter integration states
-  const [puterInitialized, setPuterInitialized] = useState(false)
-  const [puterAuthStatus, setPuterAuthStatus] = useState(false)
-  const [puterFiles, setPuterFiles] = useState<PuterFile[]>([])
-  const [showPuterFiles, setShowPuterFiles] = useState(false)
+  // FaairgoAI integration states
+  const [faairgoAIInitialized, setFaairgoAIInitialized] = useState(false)
+  const [faairgoAIAuthStatus, setFaairgoAIAuthStatus] = useState(false)
+  const [faairgoAIFiles, setFaairgoAIFiles] = useState<FaairgoAIFile[]>([])
+  const [showFaairgoAIFiles, setShowFaairgoAIFiles] = useState(false)
 
-  // Initialize Puter on component mount
+  // Initialize FaairgoAI on component mount
   useEffect(() => {
-    const initPuter = async () => {
-      const initialized = await initializePuter()
-      setPuterInitialized(initialized)
+    const initFaairgoAI = async () => {
+      const initialized = await initializeFaairgoAI()
+      setFaairgoAIInitialized(initialized)
       if (initialized) {
-        setPuterAuthStatus(getPuterAuthStatus())
-        if (getPuterAuthStatus()) {
-          loadPuterFiles()
+        setFaairgoAIAuthStatus(getFaairgoAIAuthStatus())
+        if (getFaairgoAIAuthStatus()) {
+          loadFaairgoAIFiles()
         }
       }
     }
-    initPuter()
+    initFaairgoAI()
   }, [])
 
-  const loadPuterFiles = async () => {
+  const loadFaairgoAIFiles = async () => {
     try {
-      // Only load files if Puter is initialized and user is authenticated
-      if (!puterInitialized) {
-        console.log('Puter not initialized, skipping file loading');
+      // Only load files if FaairgoAI is initialized and user is authenticated
+      if (!faairgoAIInitialized) {
+        console.log('FaairgoAI not initialized, skipping file loading');
         return;
       }
 
-      if (!getPuterAuthStatus()) {
-        console.log('User not authenticated with Puter, skipping file loading');
+      if (!getFaairgoAIAuthStatus()) {
+        console.log('User not authenticated with FaairgoAI, skipping file loading');
         return;
       }
 
-      const files = await getPuterFiles()
-      setPuterFiles(files)
+      const files = await getFaairgoAIFiles()
+      setFaairgoAIFiles(files)
     } catch (error) {
-      console.error('Failed to load Puter files:', error)
-      setPuterFiles([]) // Clear files on error
+      console.error('Failed to load FaairgoAI files:', error)
+      setFaairgoAIFiles([]) // Clear files on error
     }
   }
 
-  const handlePuterSignIn = async () => {
+  const handleFaairgoAISignIn = async () => {
     try {
-      const success = await signInToPuter()
+      const success = await signInToFaairgoAI()
       if (success) {
-        setPuterAuthStatus(true)
-        await loadPuterFiles()
-        toast.success('Successfully signed in to Puter!')
+        setFaairgoAIAuthStatus(true)
+        await loadFaairgoAIFiles()
+        toast.success('Successfully signed in to FaairgoAI!')
       }
     } catch (error) {
-      toast.error('Failed to sign in to Puter')
+      toast.error('Failed to sign in to FaairgoAI')
     }
   }
 
-  const handlePuterSignOut = async () => {
+  const handleFaairgoAISignOut = async () => {
     try {
-      const success = await signOutFromPuter()
+      const success = await signOutFromFaairgoAI()
       if (success) {
-        setPuterAuthStatus(false)
-        setPuterFiles([])
-        toast.success('Successfully signed out from Puter')
+        setFaairgoAIAuthStatus(false)
+        setFaairgoAIFiles([])
+        toast.success('Successfully signed out from FaairgoAI')
       }
     } catch (error) {
-      toast.error('Failed to sign out from Puter')
+      toast.error('Failed to sign out from FaairgoAI')
     }
   }
 
-  const saveToPuter = async () => {
-    if (!generatedIcon || !puterAuthStatus) return
+  const saveToFaairgoAI = async () => {
+    if (!generatedIcon || !faairgoAIAuthStatus) return
 
     try {
       const filename = `3d-icon-${Date.now()}.png`
-      const file = await saveIconToPuter(generatedIcon, filename)
+      const file = await saveIconToFaairgoAI(generatedIcon, filename)
       if (file) {
-        toast.success('Icon saved to Puter storage!')
-        await loadPuterFiles()
+        toast.success('Icon saved to FaairgoAI storage!')
+        await loadFaairgoAIFiles()
       } else {
-        toast.error('Failed to save icon to Puter')
+        toast.error('Failed to save icon to FaairgoAI')
       }
     } catch (error) {
-      toast.error('Failed to save icon to Puter')
+      toast.error('Failed to save icon to FaairgoAI')
     }
   }
 
@@ -420,13 +421,15 @@ export default function FairForge() {
           tagline: tagline.trim(),
           keywords: keywords.trim(),
           preferredColors: preferredColors.trim(),
-          batchSize: batchSize
+          batchSize: batchSize,
+          model: selectedModel
         }
         : {
           prompt: builtPrompt,
           negativePrompt: negativePrompt.trim(),
           style: selectedStyles.join(', '),
-          batchSize: batchSize
+          batchSize: batchSize,
+          model: selectedModel
         }
 
       const response = await fetch(endpoint, {
@@ -712,7 +715,7 @@ export default function FairForge() {
 
       // Show success message when using demo mode
       if (data.isDemoMode) {
-        toast.info('Demo mode: Using placeholder content. Sign in to Puter for full AI functionality powered by GPT and image generation.')
+        toast.info('Demo mode: Using placeholder content. Sign in to FaairgoAI for full AI functionality powered by GPT and image generation.')
       }
 
       // Add to history
@@ -1039,36 +1042,36 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                 FairForge
               </h1>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
-                Powered by Puter.js
+                Powered by FaairgoAI
               </Badge>
             </div>
 
-            {/* Puter Integration Status */}
+            {/* FaairgoAI Integration Status */}
             <div className="flex items-center gap-2">
-              {puterInitialized ? (
+              {faairgoAIInitialized ? (
                 <div className="flex items-center gap-2">
-                  {puterAuthStatus ? (
+                  {faairgoAIAuthStatus ? (
                     <>
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         <Cloud className="h-3 w-3 mr-1" />
-                        Puter Connected
+                        FaairgoAI Connected
                       </Badge>
-                      <Button variant="outline" size="sm" onClick={handlePuterSignOut}>
+                      <Button variant="outline" size="sm" onClick={handleFaairgoAISignOut}>
                         <LogOut className="h-4 w-4 mr-1" />
                         Sign Out
                       </Button>
                     </>
                   ) : (
-                    <Button variant="outline" size="sm" onClick={handlePuterSignIn}>
+                    <Button variant="outline" size="sm" onClick={handleFaairgoAISignIn}>
                       <Cloud className="h-4 w-4 mr-1" />
-                      Connect Puter
+                      Connect FaairgoAI
                     </Button>
                   )}
                 </div>
               ) : (
                 <Badge variant="secondary">
                   <CloudOff className="h-3 w-3 mr-1" />
-                  Puter Unavailable
+                  FaairgoAI Unavailable
                 </Badge>
               )}
             </div>
@@ -1480,6 +1483,23 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                       onChange={(e) => setNegativePrompt(e.target.value)}
                       className="min-h-[60px]"
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="model-select" className="text-sm font-medium text-gray-700 mb-2 block">
+                      AI Model
+                    </Label>
+                    <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value as 'gpt-4' | 'gpt-5-nano' | 'claude' | 'gemini')}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select AI model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gpt-4">GPT-4</SelectItem>
+                        <SelectItem value="gpt-5-nano">GPT-5 Nano</SelectItem>
+                        <SelectItem value="claude">Claude</SelectItem>
+                        <SelectItem value="gemini">Gemini</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Debug Test Buttons */}
@@ -1951,14 +1971,14 @@ Avoid: low quality, amateur, rushed, unclear, generic`
             )}
           </div>
 
-          {/* Right Panel - History and Puter Files */}
+          {/* Right Panel - History and FaairgoAI Files */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="current" className="h-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="current">Current</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="puter" disabled={!puterAuthStatus}>
-                  Puter Files
+                <TabsTrigger value="faairgoai" disabled={!faairgoAIAuthStatus}>
+                  FaairgoAI Files
                 </TabsTrigger>
               </TabsList>
 
@@ -2129,10 +2149,10 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                               </Button>
                             </div>
 
-                            {puterAuthStatus && (
-                              <Button onClick={saveToPuter} variant="outline" className="w-full">
+                            {faairgoAIAuthStatus && (
+                              <Button onClick={saveToFaairgoAI} variant="outline" className="w-full">
                                 <Cloud className="mr-2 h-4 w-4" />
-                                Save to Puter
+                                Save to FaairgoAI
                               </Button>
                             )}
                           </div>
@@ -2299,18 +2319,18 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                 </Card>
               </TabsContent>
 
-              <TabsContent value="puter">
+              <TabsContent value="faairgoai">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Puter Storage</CardTitle>
-                    <CardDescription>Your icons saved in Puter cloud storage</CardDescription>
+                    <CardTitle>FaairgoAI Storage</CardTitle>
+                    <CardDescription>Your icons saved in FaairgoAI cloud storage</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                      {puterFiles.length === 0 ? (
-                        <p className="text-center text-gray-500 py-8">No files in Puter storage</p>
+                      {faairgoAIFiles.length === 0 ? (
+                        <p className="text-center text-gray-500 py-8">No files in FaairgoAI storage</p>
                       ) : (
-                        puterFiles.map((file, index) => (
+                        faairgoAIFiles.map((file, index) => (
                           <div key={index} className="flex gap-3 p-3 border rounded-lg hover:bg-gray-50">
                             <img
                               src={file.readUrl || ''}

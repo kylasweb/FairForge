@@ -4,12 +4,12 @@ export async function POST(request: NextRequest) {
   try {
     console.log('📦 ZIP download request received')
 
-    // This feature is temporarily disabled during Puter.js migration
+    // This feature is temporarily disabled during FaairgoAI migration
     return NextResponse.json(
       { 
         success: false,
         error: 'ZIP download feature temporarily unavailable',
-        message: 'This feature is being updated to use Puter.js. Please use individual UI generation endpoints for now.',
+        message: 'This feature is being updated to use FaairgoAI. Please use individual UI generation endpoints for now.',
         suggestedActions: [
           'Use /api/generate-ui for UI component generation',
           'Use /api/generate-3d-icon for icon creation',

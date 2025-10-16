@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateIconWithPuter, initializePuter } from '@/lib/puter-integration'
+import { generateIconWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,11 +14,11 @@ export async function POST(request: NextRequest) {
 
     console.log('🎨 Vectorize request received:', { imageUrl })
 
-    // Initialize Puter.js
-    const puterInitialized = await initializePuter()
+    // Initialize FaairgoAI
+    const faairgoAIInitialized = await initializeFaairgoAI()
 
-    if (!puterInitialized) {
-      console.warn('⚠️ Puter.js not available, using demo mode')
+    if (!faairgoAIInitialized) {
+      console.warn('⚠️ FaairgoAI not available, using demo mode')
 
       // Create a demo SVG
       const demoSvgContent = `
@@ -35,13 +35,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         isDemoMode: true,
-        message: 'Image vectorization - Demo Mode (Puter.js not available)',
+        message: 'Image vectorization - Demo Mode (FaairgoAI not available)',
         data: {
           svgContent: demoSvgContent,
           vectorizedImageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
           originalImageUrl: imageUrl,
           metadata: {
-            model: 'puter-demo',
+            model: 'faairgoai-demo',
             style: 'vector',
             processing_time: 1.0
           }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      console.log('🚀 Starting image vectorization with Puter.js...')
+      console.log('🚀 Starting image vectorization with FaairgoAI...')
 
       // Fetch the original image
       const imageResponse = await fetch(imageUrl)
@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
       // Create a prompt for vector-style recreation
       const vectorPrompt = `Clean vector-style icon based on this image. Simple shapes, minimal design, scalable vector graphics style. Professional logo quality.`
 
-      // Generate vector-style image using Puter.js
-      const vectorImage = await generateIconWithPuter({ prompt: vectorPrompt, style: 'vector' })
+      // Generate vector-style image using FaairgoAI
+      const vectorImage = await generateIconWithFaairgoAI({ prompt: vectorPrompt, style: 'vector' })
 
       if (vectorImage && vectorImage.src) {
         // Create a simple SVG representation
@@ -81,24 +81,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           isDemoMode: false,
-          message: 'Image vectorized successfully with Puter.js',
+          message: 'Image vectorized successfully with FaairgoAI',
           data: {
             svgContent: svgContent,
             vectorizedImageUrl: vectorImage.src,
             originalImageUrl: imageUrl,
             metadata: {
-              model: 'puter-ai',
+              model: 'faairgoai-ai',
               style: 'vector',
               processing_time: 2.5
             }
           }
         })
       } else {
-        throw new Error('Failed to vectorize image with Puter.js')
+        throw new Error('Failed to vectorize image with FaairgoAI')
       }
 
     } catch (error) {
-      console.error('❌ Puter.js vectorization failed:', error)
+      console.error('❌ FaairgoAI vectorization failed:', error)
 
       // Fallback to demo mode
       const fallbackSvgContent = `

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { upscaleImageWithPuter, initializePuter } from '@/lib/puter-integration'
+import { upscaleImageWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,22 +14,22 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Upscale request received:', { imageUrl, scale })
 
-    // Initialize Puter.js
-    const puterInitialized = await initializePuter()
+    // Initialize FaairgoAI
+    const faairgoAIInitialized = await initializeFaairgoAI()
 
-    if (!puterInitialized) {
-      console.warn('⚠️ Puter.js not available, using demo mode')
+    if (!faairgoAIInitialized) {
+      console.warn('⚠️ FaairgoAI not available, using demo mode')
 
       return NextResponse.json({
         success: true,
         isDemoMode: true,
-        message: 'Image upscale - Demo Mode (Puter.js not available)',
+        message: 'Image upscale - Demo Mode (FaairgoAI not available)',
         data: {
           upscaledImageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
           originalImageUrl: imageUrl,
           scale: scale,
           metadata: {
-            model: 'puter-demo',
+            model: 'faairgoai-demo',
             processing_time: 1.5
           }
         }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      console.log('🚀 Starting image upscaling with Puter.js...')
+      console.log('🚀 Starting image upscaling with FaairgoAI...')
 
       // Fetch the original image
       const imageResponse = await fetch(imageUrl)
@@ -47,8 +47,8 @@ export async function POST(request: NextRequest) {
       // Create enhanced prompt for upscaling
       const upscalePrompt = `Enhance and upscale this image to ${scale}x resolution with improved detail, clarity, and quality. Maintain the original style and composition while adding fine details and sharpness. High resolution, professional quality, detailed texture.`
 
-      // Generate upscaled image using Puter.js
-      const upscaledImage = await upscaleImageWithPuter(imageBase64)
+      // Generate upscaled image using FaairgoAI
+      const upscaledImage = await upscaleImageWithFaairgoAI(imageBase64)
 
       if (upscaledImage && upscaledImage.src) {
         const upscaledImageUrl = upscaledImage.src
@@ -58,23 +58,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           isDemoMode: false,
-          message: 'Image upscaled successfully with Puter.js',
+          message: 'Image upscaled successfully with FaairgoAI',
           data: {
             upscaledImageUrl,
             originalImageUrl: imageUrl,
             scale: scale,
             metadata: {
-              model: 'puter-ai',
+              model: 'faairgoai-ai',
               processing_time: 3.0
             }
           }
         })
       } else {
-        throw new Error('Failed to upscale image with Puter.js')
+        throw new Error('Failed to upscale image with FaairgoAI')
       }
 
     } catch (error) {
-      console.error('❌ Puter.js upscaling failed:', error)
+      console.error('❌ FaairgoAI upscaling failed:', error)
 
       // Fallback to demo mode
       return NextResponse.json({

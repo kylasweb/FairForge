@@ -1,39 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { remixImageWithPuter, initializePuter } from '@/lib/puter-integration'
+import { remixImageWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration'
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🧪 Test remix endpoint called')
 
-    // Initialize Puter.js
-    const puterInitialized = await initializePuter()
+    // Initialize FaairgoAI
+    const faairgoAIInitialized = await initializeFaairgoAI()
 
-    if (!puterInitialized) {
-      console.warn('⚠️ Puter.js not available, using demo mode')
+    if (!faairgoAIInitialized) {
+      console.warn('⚠️ FaairgoAI not available, using demo mode')
 
       return NextResponse.json({
         success: true,
         isDemoMode: true,
-        message: 'Test remix - Demo Mode (Puter.js not available)',
+        message: 'Test remix - Demo Mode (FaairgoAI not available)',
         data: {
           imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
           prompt: 'Demo test remix',
           metadata: {
-            model: 'puter-demo',
+            model: 'faairgoai-demo',
             processing_time: 1.0
           }
         }
       })
     }
 
-    console.log('✅ Puter.js initialized')
+    console.log('✅ FaairgoAI initialized')
 
     try {
       // Generate a simple test image
       const testPrompt = 'A simple red circle on white background, minimal design'
       console.log('🚀 Generating test image with prompt:', testPrompt)
 
-      const testImage = await remixImageWithPuter('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', testPrompt)
+      const testImage = await remixImageWithFaairgoAI('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', testPrompt)
 
       if (testImage && testImage.src) {
         console.log('✅ Test image generated successfully')
@@ -41,22 +41,22 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           isDemoMode: false,
-          message: 'Test remix completed successfully with Puter.js',
+          message: 'Test remix completed successfully with FaairgoAI',
           data: {
             testImage: testImage.src,
             prompt: testPrompt,
             metadata: {
-              model: 'puter-ai',
+              model: 'faairgoai-ai',
               processing_time: 2.0
             }
           }
         })
       } else {
-        throw new Error('No image data received from Puter.js')
+        throw new Error('No image data received from FaairgoAI')
       }
 
     } catch (error) {
-      console.error('❌ Puter.js test remix failed:', error)
+      console.error('❌ FaairgoAI test remix failed:', error)
 
       // Fallback to demo mode
       return NextResponse.json({

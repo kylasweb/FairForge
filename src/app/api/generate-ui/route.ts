@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateUIWithPuter, generateCodeWithPuter, initializePuter } from '@/lib/puter-integration';
+import { generateUIWithFaairgoAI, generateCodeWithFaairgoAI, initializeFaairgoAI } from '@/lib/faairgoai-integration';
 
 export async function POST(request: NextRequest) {
   console.log('🎯 UI Generation API called');
@@ -41,11 +41,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🚀 Starting UI generation with Puter.js...');
+    console.log('🚀 Starting UI generation with FaairgoAI...');
     console.log('📝 Request details:', { type, platform, style, prompt: prompt?.substring(0, 100) });
 
-    // Initialize Puter for server-side AI generation
-    const puterInitialized = await initializePuter();
+    // Initialize FaairgoAI for server-side AI generation
+    const faairgoAIInitialized = await initializeFaairgoAI();
 
     let finalPrompt = '';
 
@@ -80,12 +80,12 @@ export async function POST(request: NextRequest) {
     let base64Image = '';
     let generatedCode = '';
 
-    if (puterInitialized) {
-      console.log('🎨 Generating UI with Puter.js...');
+    if (faairgoAIInitialized) {
+      console.log('🎨 Generating UI with FaairgoAI...');
 
       try {
-        // Generate UI image using Puter.js
-        const imageResult = await generateUIWithPuter({
+        // Generate UI image using FaairgoAI
+        const imageResult = await generateUIWithFaairgoAI({
           prompt: finalPrompt,
           style,
           size: '1024x1024'
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         // Generate corresponding HTML/CSS code
         const codePrompt = `Create a complete, functional ${platform} interface that matches the ${style} design style. ${type === 'textToUI' ? `Requirements: ${prompt}` : 'Based on the UI design provided.'}`;
 
-        const codeResult = await generateCodeWithPuter({
+        const codeResult = await generateCodeWithFaairgoAI({
           prompt: codePrompt,
           language: 'typescript',
           framework: 'react',
@@ -118,13 +118,13 @@ export async function POST(request: NextRequest) {
         }
 
       } catch (error) {
-        console.error('❌ Puter.js generation failed:', error);
+        console.error('❌ FaairgoAI generation failed:', error);
         // Fallback to demo content
         base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
         generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
       }
     } else {
-      console.log('⚠️ Puter.js not available, using demo content');
+      console.log('⚠️ FaairgoAI not available, using demo content');
       // Fallback to demo content
       base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
       generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      isDemoMode: !puterInitialized, // Demo mode only if Puter.js unavailable
+      isDemoMode: !faairgoAIInitialized, // Demo mode only if FaairgoAI unavailable
       data: {
         image: base64Image,
         code: generatedCode
@@ -239,7 +239,7 @@ function generateDemoUIImage(style: string, platform: string, type: string, prom
 
   // Generate different content based on prompt keywords
   let title = 'Custom Interface';
-  let subtitle = `A ${style} ${platform} interface powered by Puter.js AI`;
+  let subtitle = `A ${style} ${platform} interface powered by FaairgoAI`;
   let theme = '#667eea', theme2 = '#764ba2';
   let cards: Array<{ icon: string, title: string, desc: string, btn: string }> = [];
 
@@ -417,7 +417,7 @@ function generateDemoUIImage(style: string, platform: string, type: string, prom
             </div>`).join('')}
         </div>
         <div class="footer">
-            <p>Generated with FairForge • Powered by Puter.js</p>
+            <p>Generated with FairForge • Powered by FaairgoAI</p>
             <small>Prompt: "${prompt.slice(0, 100)}${prompt.length > 100 ? '...' : ''}"</small>
         </div>
     </div>
