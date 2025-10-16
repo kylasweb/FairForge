@@ -48,34 +48,82 @@ export interface AICodeOptions {
  */
 export async function initializePuter(): Promise<boolean> {
   try {
-    // Check if Puter is already loaded
-    if (typeof window !== 'undefined' && window.puter) {
+    // For server-side rendering, return false
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    // Check if Puter is already loaded and authenticated
+    if (window.puter && await checkPuterAuth()) {
       return true;
     }
 
     // Load Puter script if not available
-    if (typeof window !== 'undefined') {
+    if (!window.puter) {
       const script = document.createElement('script');
       script.src = 'https://js.puter.com/v2/';
       script.async = true;
 
-      return new Promise((resolve) => {
-        script.onload = () => {
-          resolve(true);
-        };
-        script.onerror = () => {
-          resolve(false);
-        };
+      const loaded = await new Promise<boolean>((resolve) => {
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
         document.head.appendChild(script);
       });
+
+      if (!loaded) {
+        console.warn('Failed to load Puter.js script');
+        return false;
+      }
+
+      // Wait a bit for Puter to initialize
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    return false;
+    // Check if user is authenticated
+    return await checkPuterAuth();
   } catch (error) {
     console.error('Failed to initialize Puter:', error);
     return false;
   }
 }
+
+/**
+ * Check if Puter is authenticated
+ */
+export async function checkPuterAuth(): Promise<boolean> {
+  try {
+    if (!window.puter) {
+      return false;
+    }
+
+    // Try to get user info to check if authenticated
+    const user = await window.puter.auth.getUser();
+    return !!user;
+  } catch (error) {
+    // User not authenticated or error occurred
+    return false;
+  }
+}
+
+/**
+ * Prompt user to authenticate with Puter
+ */
+export async function authenticatePuter(): Promise<boolean> {
+  try {
+    if (typeof window === 'undefined' || !window.puter) {
+      return false;
+    }
+
+    // Show authentication dialog
+    await window.puter.auth.signIn();
+    return true;
+  } catch (error) {
+    console.error('Puter authentication failed:', error);
+    return false;
+  }
+}
+
+
 
 /**
  * Save generated icon to Puter storage
