@@ -166,9 +166,21 @@ async function generateWithFallback(prompt: string, type: 'icon' | 'logo' | 'ui'
         try {
             console.log(`🔄 Trying ${provider.name} as fallback for ${type} generation...`);
             const result = await provider.func(prompt);
-            if (result) {
+            if (result && result.success && result.data) {
                 console.log(`✅ ${provider.name} fallback successful!`);
-                return result;
+                // Convert AIResponse data to HTMLImageElement
+                if (typeof result.data === 'string' && result.data.startsWith('data:image/')) {
+                    const img = new Image();
+                    img.src = result.data;
+                    return img;
+                } else if (result.data instanceof HTMLImageElement) {
+                    return result.data;
+                } else if (typeof result.data === 'string' && result.data.startsWith('http')) {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.src = result.data;
+                    return img;
+                }
             }
         } catch (error) {
             console.log(`❌ ${provider.name} fallback failed:`, error);
