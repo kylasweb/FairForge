@@ -391,6 +391,172 @@ export default function FairForge() {
     setCustomPrompt(template.prompt)
   }
 
+  // Quick Demo Functions for 1-click generation
+  const runIconDemo = async () => {
+    const demoTemplate = promptTemplates.minimalist[0] // "Home Icon"
+    setSelectedStyle('minimalist')
+    setCustomPrompt(demoTemplate.prompt)
+    setSelectedTemplate(demoTemplate.prompt)
+    setMode('icon')
+
+    // Auto-generate after setting values
+    setTimeout(() => {
+      toast.info('Running Icon Demo - Generating minimalist home icon...')
+      generateIcon()
+    }, 500)
+  }
+
+  const runLogoDemo = async () => {
+    const demoTemplate = logoTemplates.modern[0] // "Tech Startup"
+    setSelectedStyle('modern')
+    setCustomPrompt(demoTemplate.prompt)
+    setSelectedTemplate(demoTemplate.prompt)
+    setCompanyName('TechFlow')
+    setTagline('Innovation Simplified')
+    setKeywords('technology, innovation, modern')
+    setPreferredColors('blue, white, silver')
+    setMode('logo')
+
+    // Auto-generate after setting values
+    setTimeout(() => {
+      toast.info('Running Logo Demo - Generating modern tech startup logo...')
+      generateIcon()
+    }, 500)
+  }
+
+  const runUIDemo = async () => {
+    const demoTemplate = uiGenerationTemplates.textToUI[0] // "Login Screen"
+    setUiGenerationType('textToUI')
+    setSelectedPlatform('mobile')
+    setSelectedUIStyle('modern')
+    setUiPrompt(demoTemplate.prompt)
+
+    // Auto-generate after setting values
+    setTimeout(() => {
+      toast.info('Running UI Demo - Generating modern login screen...')
+      generateUI()
+    }, 500)
+  }
+
+  const run3DIconDemo = async () => {
+    const demoTemplate = promptTemplates.realistic[0] // "Camera"
+    setSelectedStyle('realistic')
+    setCustomPrompt(demoTemplate.prompt)
+    setSelectedTemplate(demoTemplate.prompt)
+    setMode('icon')
+
+    // Auto-generate after setting values
+    setTimeout(() => {
+      toast.info('Running 3D Icon Demo - Generating photorealistic camera icon...')
+      generateIcon()
+    }, 500)
+  }
+
+  const runArchitectDemo = async () => {
+    const demoPrompt = "Create a modern mobile app dashboard for fitness tracking"
+    setArchitectPrompt(demoPrompt)
+    setArchitectOutputType('image')
+    setMode('architect')
+
+    // Auto-generate after setting values
+    setTimeout(() => {
+      toast.info('Running Architect Demo - Enhancing prompt with AI analysis...')
+      processArchitectPrompt()
+    }, 500)
+  }
+
+  // Additional demo functions for variety
+  const runRandomIconDemo = async () => {
+    const styles = ['minimalist', 'realistic', 'cartoon', 'futuristic', 'neon', 'vintage']
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)]
+    const templates = promptTemplates[randomStyle as keyof typeof promptTemplates]
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+
+    setSelectedStyle(randomStyle)
+    setCustomPrompt(randomTemplate.prompt)
+    setSelectedTemplate(randomTemplate.prompt)
+    setMode('icon')
+
+    setTimeout(() => {
+      toast.info(`Running Random Icon Demo - Generating ${randomStyle} style: ${randomTemplate.name}`)
+      generateIcon()
+    }, 500)
+  }
+
+  const runRandomLogoDemo = async () => {
+    const logoStyles = ['modern', 'vintage', 'luxury', 'tech', 'organic', 'geometric', 'handwritten', 'bold']
+    const randomStyle = logoStyles[Math.floor(Math.random() * logoStyles.length)]
+    const templates = logoTemplates[randomStyle as keyof typeof logoTemplates]
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+
+    const companyNames = ['TechFlow', 'InnovateCorp', 'CreateLab', 'DesignForge', 'FutureVision', 'BrightIdeas']
+    const taglines = ['Innovation Simplified', 'Creating Tomorrow', 'Design Excellence', 'Beyond Boundaries', 'Future Ready', 'Ideas in Motion']
+
+    setSelectedStyle(randomStyle)
+    setCustomPrompt(randomTemplate.prompt)
+    setSelectedTemplate(randomTemplate.prompt)
+    setCompanyName(companyNames[Math.floor(Math.random() * companyNames.length)])
+    setTagline(taglines[Math.floor(Math.random() * taglines.length)])
+    setMode('logo')
+
+    setTimeout(() => {
+      toast.info(`Running Random Logo Demo - Generating ${randomStyle} style: ${randomTemplate.name}`)
+      generateIcon()
+    }, 500)
+  }
+
+  const runRandomUIDemo = async () => {
+    const platforms = ['web', 'mobile', 'tablet', 'responsive']
+    const styles = ['modern', 'minimalist', 'material', 'ios', 'bootstrap', 'tailwind']
+    const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)]
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)]
+    const templates = uiGenerationTemplates.textToUI
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+
+    setUiGenerationType('textToUI')
+    setSelectedPlatform(randomPlatform)
+    setSelectedUIStyle(randomStyle)
+    setUiPrompt(randomTemplate.prompt)
+
+    setTimeout(() => {
+      toast.info(`Running Random UI Demo - Generating ${randomStyle} ${randomPlatform} UI: ${randomTemplate.name}`)
+      generateUI()
+    }, 500)
+  }
+
+  // Industry-specific demo functions
+  const runTechIconDemo = async () => {
+    const techTemplates = industryTemplates.it
+    const randomTemplate = techTemplates[Math.floor(Math.random() * techTemplates.length)]
+
+    setSelectedIndustry('it')
+    setSelectedStyle('futuristic')
+    setCustomPrompt(randomTemplate.prompt)
+    setSelectedTemplate(randomTemplate.prompt)
+    setMode('icon')
+
+    setTimeout(() => {
+      toast.info(`Running Tech Demo - Generating IT industry icon: ${randomTemplate.name}`)
+      generateIcon()
+    }, 500)
+  }
+
+  const runMedicalIconDemo = async () => {
+    const medicalTemplates = industryTemplates.medical
+    const randomTemplate = medicalTemplates[Math.floor(Math.random() * medicalTemplates.length)]
+
+    setSelectedIndustry('medical')
+    setSelectedStyle('realistic')
+    setCustomPrompt(randomTemplate.prompt)
+    setSelectedTemplate(randomTemplate.prompt)
+    setMode('icon')
+
+    setTimeout(() => {
+      toast.info(`Running Medical Demo - Generating healthcare icon: ${randomTemplate.name}`)
+      generateIcon()
+    }, 500)
+  }
+
   const getCurrentTemplates = () => {
     if (mode === 'logo') {
       return logoTemplates[selectedStyle as keyof typeof logoTemplates] || []
@@ -1490,6 +1656,87 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                         : `Industry-specific templates for ${industryOptions.find(opt => opt.value === selectedIndustry)?.label}`
                     }
                   </CardDescription>
+                  {/* Quick Demo Buttons */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {mode === 'icon' && (
+                      <>
+                        <Button
+                          onClick={runIconDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="secondary"
+                          className="flex items-center gap-2"
+                        >
+                          <Zap className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Quick Icon Demo'}
+                        </Button>
+                        <Button
+                          onClick={run3DIconDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="secondary"
+                          className="flex items-center gap-2"
+                        >
+                          <Box className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : '3D Icon Demo'}
+                        </Button>
+                        <Button
+                          onClick={runRandomIconDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Random Icon'}
+                        </Button>
+                        <Button
+                          onClick={runTechIconDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <Cloud className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Tech Icon'}
+                        </Button>
+                        <Button
+                          onClick={runMedicalIconDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <PenTool className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Medical Icon'}
+                        </Button>
+                      </>
+                    )}
+                    {mode === 'logo' && (
+                      <>
+                        <Button
+                          onClick={runLogoDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="secondary"
+                          className="flex items-center gap-2"
+                        >
+                          <Lightning className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Quick Logo Demo'}
+                        </Button>
+                        <Button
+                          onClick={runRandomLogoDemo}
+                          disabled={isGenerating}
+                          size="sm"
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          {isGenerating ? 'Generating...' : 'Random Logo'}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {mode === 'logo' ? (
@@ -1782,6 +2029,19 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                     <CardDescription>
                       Transform simple ideas into comprehensive, detailed prompts using AI-powered prompt engineering
                     </CardDescription>
+                    {/* Quick Demo Button */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <Button
+                        onClick={runArchitectDemo}
+                        disabled={isGenerating}
+                        size="sm"
+                        variant="secondary"
+                        className="flex items-center gap-2"
+                      >
+                        <Wand2 className="h-4 w-4" />
+                        {isGenerating ? 'Processing...' : 'Quick Architect Demo'}
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {architectMode === 'input' && (
@@ -1972,6 +2232,29 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                     UI Generation Templates
                   </CardTitle>
                   <CardDescription>Quick start with pre-designed UI templates</CardDescription>
+                  {/* Quick Demo Button */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Button
+                      onClick={runUIDemo}
+                      disabled={isGenerating}
+                      size="sm"
+                      variant="secondary"
+                      className="flex items-center gap-2"
+                    >
+                      <Monitor className="h-4 w-4" />
+                      {isGenerating ? 'Generating...' : 'Quick UI Demo'}
+                    </Button>
+                    <Button
+                      onClick={runRandomUIDemo}
+                      disabled={isGenerating}
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      {isGenerating ? 'Generating...' : 'Random UI'}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <Tabs value={uiGenerationType} onValueChange={(value: any) => setUiGenerationType(value)}>
