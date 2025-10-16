@@ -25,15 +25,40 @@ export interface FaairgoAIOptions {
     style?: string;
     size?: string;
     quality?: string;
-    model?: 'gpt-4' | 'gpt-5-nano' | 'claude' | 'gemini';
+    model?: 'gpt-4' | 'gpt-5-nano' | 'claude' | 'claude-sonnet-4' | 'gemini' | 'gemini-2.5-flash' | 'grok' | 'mistral' | 'dall-e-3' | 'deepseek';
 }
 
 export interface AIImageOptions {
     prompt: string;
     style?: string;
     size?: '256x256' | '512x512' | '1024x1024' | '1792x1024' | '1024x1792';
-    quality?: 'standard' | 'hd';
+    quality?: 'standard' | 'hd' | 'low' | 'medium' | 'high';
     model?: string;
+}
+
+export interface StreamingChatOptions {
+    model?: string;
+    temperature?: number;
+    max_tokens?: number;
+    stream: true;
+}
+
+export interface FunctionCallOptions {
+    name: string;
+    description: string;
+    parameters: {
+        type: string;
+        properties: Record<string, any>;
+        required?: string[];
+    };
+}
+
+export interface ImageAnalysisResult {
+    description: string;
+    objects: string[];
+    colors: string[];
+    mood?: string;
+    style?: string;
 }
 
 export interface AICodeOptions {
@@ -502,6 +527,219 @@ export async function remixImageWithFaairgoAI(imageData: string, newStyle: strin
         return null; // Return processed image
     } catch (error) {
         console.error('Failed to remix image with FaairgoAI:', error);
+        return null;
+    }
+}
+
+/**
+ * Image analysis using FaairgoAI (img2txt)
+ */
+export async function analyzeImageWithFaairgoAI(imageUrl: string, model: string = 'gpt-5-nano'): Promise<string | null> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const description = await window.puter.ai.img2txt(imageUrl);
+        return description;
+    } catch (error) {
+        console.error('Failed to analyze image with FaairgoAI:', error);
+        return null;
+    }
+}
+
+/**
+ * Text-to-speech using FaairgoAI
+ */
+export async function textToSpeechWithFaairgoAI(text: string, language: string = 'en', voice?: string): Promise<HTMLAudioElement | null> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const audio = await window.puter.ai.txt2speech(text, language, voice);
+        return audio;
+    } catch (error) {
+        console.error('Failed to generate speech with FaairgoAI:', error);
+        return null;
+    }
+}
+
+/**
+ * Advanced chat functionality with FaairgoAI
+ */
+export async function chatWithFaairgoAI(prompt: string, model: string = 'gpt-5-nano', options?: {
+    stream?: boolean;
+    temperature?: number;
+    max_tokens?: number;
+}): Promise<any> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const response = await window.puter.ai.chat(prompt, {
+            model: model,
+            ...options
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Failed to chat with FaairgoAI:', error);
+        return null;
+    }
+}
+
+/**
+ * Streaming chat responses for real-time generation
+ */
+export async function* streamChatWithFaairgoAI(
+    prompt: string,
+    model: string = 'gpt-5-nano',
+    options?: StreamingChatOptions
+): AsyncGenerator<string, void, unknown> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const streamResponse = await window.puter.ai.chat(prompt, {
+            model: model,
+            stream: true,
+            ...options
+        });
+
+        for await (const chunk of streamResponse) {
+            if (chunk?.text) {
+                yield chunk.text;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to stream chat with FaairgoAI:', error);
+        yield `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`;
+    }
+}
+
+/**
+ * Enhanced image analysis with detailed results
+ */
+export async function analyzeImageAdvanced(imageUrl: string, model: string = 'gpt-5-nano'): Promise<ImageAnalysisResult | null> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        // Get basic description
+        const description = await window.puter.ai.img2txt(imageUrl);
+
+        // Enhanced analysis using chat
+        const analysisPrompt = `Analyze this image and provide:
+        1. A detailed description
+        2. List of main objects/subjects
+        3. Color palette (main colors)
+        4. Overall mood/emotion
+        5. Art style or photographic style
+        
+        Respond in JSON format with keys: description, objects, colors, mood, style`;
+
+        const enhancedAnalysis = await window.puter.ai.chat(analysisPrompt, imageUrl, {
+            model: model
+        });
+
+        try {
+            const parsed = JSON.parse(enhancedAnalysis.message?.content || '{}');
+            return {
+                description: description || parsed.description || 'No description available',
+                objects: parsed.objects || [],
+                colors: parsed.colors || [],
+                mood: parsed.mood,
+                style: parsed.style
+            };
+        } catch {
+            // Fallback to basic description if JSON parsing fails
+            return {
+                description: description || 'No description available',
+                objects: [],
+                colors: [],
+                mood: undefined,
+                style: undefined
+            };
+        }
+    } catch (error) {
+        console.error('Failed to analyze image with FaairgoAI:', error);
+        return null;
+    }
+}
+
+/**
+ * Enhanced text-to-image with quality controls
+ */
+export async function generateImageWithQuality(
+    prompt: string,
+    options: {
+        model?: string;
+        quality?: 'low' | 'medium' | 'high' | 'hd' | 'standard';
+        size?: string;
+        style?: string;
+    } = {}
+): Promise<HTMLImageElement | null> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const {
+            model = 'gpt-image-1',
+            quality = 'medium',
+            size = '512x512',
+            style = ''
+        } = options;
+
+        const enhancedPrompt = style ? `${prompt}, ${style}` : prompt;
+
+        const imageResponse = await window.puter.ai.txt2img(enhancedPrompt, {
+            model: model,
+            quality: quality,
+            size: size
+        });
+
+        return imageResponse;
+    } catch (error) {
+        console.error('Failed to generate image with quality controls:', error);
+        return null;
+    }
+}
+
+/**
+ * Function calling capability for advanced AI interactions
+ */
+export async function chatWithFunctions(
+    prompt: string,
+    functions: FunctionCallOptions[],
+    model: string = 'gpt-5-nano'
+): Promise<any> {
+    try {
+        if (!window.puter?.ai) {
+            throw new Error('FaairgoAI not available');
+        }
+
+        const tools = functions.map(func => ({
+            type: 'function',
+            function: {
+                name: func.name,
+                description: func.description,
+                parameters: func.parameters
+            }
+        }));
+
+        const response = await window.puter.ai.chat(prompt, {
+            model: model,
+            tools: tools
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Failed to chat with functions:', error);
         return null;
     }
 }

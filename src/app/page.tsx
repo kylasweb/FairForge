@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Download, Sparkles, Box, Palette, Zap, Cloud, CloudOff, User, LogOut, PenTool, RefreshCw, Eraser, Expand, Wand2, Settings, Trash2, Edit3, Layers, Grid3x3, Monitor, Smartphone, Tablet, Upload, Code, FileText, Bug, Camera, Archive } from 'lucide-react'
+import { Loader2, Download, Sparkles, Box, Palette, Zap, Cloud, CloudOff, User, LogOut, PenTool, RefreshCw, Eraser, Expand, Wand2, Settings, Trash2, Edit3, Layers, Grid3x3, Monitor, Smartphone, Tablet, Upload, Code, FileText, Bug, Camera, Archive, Volume2, Eye, Sliders, Zap as Lightning, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
-import { initializeFaairgoAI, saveIconToFaairgoAI, getFaairgoAIFiles, getFaairgoAIAuthStatus, signInToFaairgoAI, signOutFromFaairgoAI, type FaairgoAIFile } from '@/lib/faairgoai-integration'
+import { initializeFaairgoAI, saveIconToFaairgoAI, getFaairgoAIFiles, getFaairgoAIAuthStatus, signInToFaairgoAI, signOutFromFaairgoAI, streamChatWithFaairgoAI, analyzeImageAdvanced, generateImageWithQuality, textToSpeechWithFaairgoAI, type FaairgoAIFile } from '@/lib/faairgoai-integration'
 import JSZip from 'jszip'
 
 // UI/UX Generation Templates
@@ -250,13 +250,22 @@ export default function FairForge() {
   const [selectedStyle, setSelectedStyle] = useState('minimalist')
   const [selectedStyles, setSelectedStyles] = useState<string[]>(['minimalist']) // For composable styles
   const [selectedIndustry, setSelectedIndustry] = useState('general')
-  const [selectedModel, setSelectedModel] = useState<'gpt-4' | 'gpt-5-nano' | 'claude' | 'gemini'>('gpt-4')
+  const [selectedModel, setSelectedModel] = useState<'gpt-4' | 'gpt-5-nano' | 'claude' | 'claude-sonnet-4' | 'gemini' | 'gemini-2.5-flash' | 'grok' | 'mistral' | 'dall-e-3' | 'deepseek'>('gpt-5-nano')
   const [customPrompt, setCustomPrompt] = useState('')
   const [negativePrompt, setNegativePrompt] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedIcon, setGeneratedIcon] = useState<string | null>(null)
   const [generatedVariations, setGeneratedVariations] = useState<string[]>([])
+
+  // Enhanced features state
+  const [selectedQuality, setSelectedQuality] = useState<'low' | 'medium' | 'high' | 'hd'>('medium')
+  const [streamingEnabled, setStreamingEnabled] = useState(false)
+  const [streamingText, setStreamingText] = useState('')
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [imageAnalysis, setImageAnalysis] = useState<any>(null)
+  const [audioEnabled, setAudioEnabled] = useState(false)
 
   // Prompt Architect States
   const [architectPrompt, setArchitectPrompt] = useState('')
@@ -270,7 +279,6 @@ export default function FairForge() {
   const [uiGenerationType, setUiGenerationType] = useState<'textToUI' | 'wireframeToUI' | 'screenshotToUI'>('textToUI')
   const [selectedPlatform, setSelectedPlatform] = useState('web')
   const [selectedUIStyle, setSelectedUIStyle] = useState('modern')
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [urlInput, setUrlInput] = useState('')
   const [uiPrompt, setUiPrompt] = useState('')
   const [generatedUI, setGeneratedUI] = useState<string | null>(null)
@@ -498,6 +506,111 @@ export default function FairForge() {
       toast.error(`Failed to generate ${mode}. Please try again.`)
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  // Enhanced Features Functions
+
+  const handleStreamingGeneration = async () => {
+    if (!customPrompt.trim()) {
+      toast.error('Please enter a prompt for streaming generation')
+      return
+    }
+
+    setIsStreaming(true)
+    setStreamingText('')
+
+    try {
+      const streamGenerator = streamChatWithFaairgoAI(
+        `Generate creative suggestions for: ${customPrompt}`,
+        selectedModel,
+        { stream: true }
+      )
+
+      for await (const chunk of streamGenerator) {
+        setStreamingText(prev => prev + chunk)
+      }
+
+      toast.success('Streaming generation completed!')
+    } catch (error) {
+      console.error('Streaming error:', error)
+      toast.error('Streaming generation failed')
+    } finally {
+      setIsStreaming(false)
+    }
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload a valid image file')
+      return
+    }
+
+    try {
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        const imageUrl = e.target?.result as string
+        setUploadedImage(imageUrl)
+
+        // Analyze the image
+        const analysis = await analyzeImageAdvanced(imageUrl, selectedModel)
+        if (analysis) {
+          setImageAnalysis(analysis)
+          toast.success('Image analyzed successfully!')
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Image upload error:', error)
+      toast.error('Failed to upload image')
+    }
+  }
+
+  const generateWithQualityControl = async () => {
+    if (!customPrompt.trim()) {
+      toast.error('Please enter a prompt')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const generatedImage = await generateImageWithQuality(customPrompt, {
+        model: selectedModel.includes('dall-e') ? 'dall-e-3' : 'gpt-image-1',
+        quality: selectedQuality,
+        size: '512x512',
+        style: selectedStyles.join(', ')
+      })
+
+      if (generatedImage?.src) {
+        setGeneratedVariations(prev => [...prev, generatedImage.src])
+        toast.success('High-quality image generated!')
+      }
+    } catch (error) {
+      console.error('Quality generation error:', error)
+      toast.error('Failed to generate with quality controls')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleTextToSpeech = async (text: string) => {
+    if (!text.trim()) {
+      toast.error('No text to convert to speech')
+      return
+    }
+
+    try {
+      const audio = await textToSpeechWithFaairgoAI(text)
+      if (audio) {
+        audio.play()
+        toast.success('Playing generated audio!')
+      }
+    } catch (error) {
+      console.error('Text-to-speech error:', error)
+      toast.error('Failed to generate speech')
     }
   }
 
@@ -1489,20 +1602,152 @@ Avoid: low quality, amateur, rushed, unclear, generic`
                     <Label htmlFor="model-select" className="text-sm font-medium text-gray-700 mb-2 block">
                       AI Model
                     </Label>
-                    <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value as 'gpt-4' | 'gpt-5-nano' | 'claude' | 'gemini')}>
+                    <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value as 'gpt-4' | 'gpt-5-nano' | 'claude' | 'claude-sonnet-4' | 'gemini' | 'gemini-2.5-flash' | 'grok' | 'mistral' | 'dall-e-3' | 'deepseek')}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select AI model" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gpt-4">GPT-4</SelectItem>
-                        <SelectItem value="gpt-5-nano">GPT-5 Nano</SelectItem>
-                        <SelectItem value="claude">Claude</SelectItem>
-                        <SelectItem value="gemini">Gemini</SelectItem>
+                        <SelectItem value="gpt-5-nano">🚀 GPT-5 Nano (Default)</SelectItem>
+                        <SelectItem value="gpt-4">🤖 GPT-4</SelectItem>
+                        <SelectItem value="claude">🧠 Claude</SelectItem>
+                        <SelectItem value="claude-sonnet-4">🎭 Claude Sonnet 4</SelectItem>
+                        <SelectItem value="gemini">💎 Gemini</SelectItem>
+                        <SelectItem value="gemini-2.5-flash">⚡ Gemini 2.5 Flash</SelectItem>
+                        <SelectItem value="grok">🤯 Grok (xAI)</SelectItem>
+                        <SelectItem value="mistral">🌟 Mistral</SelectItem>
+                        <SelectItem value="dall-e-3">🎨 DALL-E 3</SelectItem>
+                        <SelectItem value="deepseek">🔍 DeepSeek</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {/* Debug Test Buttons */}
+                  {/* Enhanced Features */}
+                  <div className="space-y-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border">
+                    <h4 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+                      <Lightning className="h-4 w-4" />
+                      Enhanced AI Features
+                    </h4>
+
+                    {/* Quality Control */}
+                    <div>
+                      <Label htmlFor="quality-select" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <Sliders className="h-4 w-4" />
+                        Image Quality
+                      </Label>
+                      <Select value={selectedQuality} onValueChange={(value) => setSelectedQuality(value as 'low' | 'medium' | 'high' | 'hd')}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select quality" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">🔸 Low (Fast)</SelectItem>
+                          <SelectItem value="medium">🔷 Medium (Balanced)</SelectItem>
+                          <SelectItem value="high">💎 High (Quality)</SelectItem>
+                          <SelectItem value="hd">🌟 HD (Premium)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Enhanced Generation Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        onClick={generateWithQualityControl}
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Sliders className="h-4 w-4" />
+                        Quality Gen
+                      </Button>
+
+                      <Button
+                        onClick={handleStreamingGeneration}
+                        disabled={isStreaming}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        {isStreaming ? 'Streaming...' : 'Stream Ideas'}
+                      </Button>
+                    </div>
+
+                    {/* Audio Controls */}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="audio-enabled"
+                        checked={audioEnabled}
+                        onChange={(e) => setAudioEnabled(e.target.checked)}
+                        className="rounded"
+                      />
+                      <Label htmlFor="audio-enabled" className="text-sm flex items-center gap-2">
+                        <Volume2 className="h-4 w-4" />
+                        Enable Text-to-Speech
+                      </Label>
+                      {audioEnabled && (
+                        <Button
+                          onClick={() => handleTextToSpeech(customPrompt)}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Image Upload & Analysis */}
+                  <div className="space-y-4 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border">
+                    <h4 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+                      <Eye className="h-4 w-4" />
+                      Image Analysis & Upload
+                    </h4>
+
+                    <div>
+                      <Label htmlFor="image-upload" className="text-sm font-medium text-gray-700 mb-2 block">
+                        Upload Image for Analysis
+                      </Label>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                    </div>
+
+                    {uploadedImage && (
+                      <div className="space-y-2">
+                        <img src={uploadedImage} alt="Uploaded" className="w-full h-32 object-cover rounded" />
+                        {imageAnalysis && (
+                          <div className="text-xs text-gray-600 bg-white p-2 rounded">
+                            <p><strong>Description:</strong> {imageAnalysis.description}</p>
+                            {imageAnalysis.colors.length > 0 && (
+                              <p><strong>Colors:</strong> {imageAnalysis.colors.join(', ')}</p>
+                            )}
+                            {imageAnalysis.mood && <p><strong>Mood:</strong> {imageAnalysis.mood}</p>}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Streaming Text Display */}
+                  {streamingText && (
+                    <div className="space-y-2 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border">
+                      <h4 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        AI Streaming Response
+                      </h4>
+                      <div className="text-sm text-gray-700 bg-white p-3 rounded max-h-32 overflow-y-auto">
+                        {streamingText}
+                        {isStreaming && <span className="animate-pulse">|</span>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Original Generate Button */}
                   <Button
                     onClick={generateIcon}
                     disabled={isGenerating || (!customPrompt.trim() && !companyName.trim())}
