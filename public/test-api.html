@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Test</title>
+</head>
+
+<body>
+    <button onclick="testAPI()">Test UI Generation API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+
+            try {
+                const response = await fetch('/api/generate-ui', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'textToUI',
+                        platform: 'web',
+                        style: 'modern',
+                        prompt: 'Simple login form with username and password'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h3>Success!</h3>
+                        <p>Image length: ${data.data.image.length}</p>
+                        <p>Code length: ${data.data.code.length}</p>
+                        <p>Demo mode: ${data.isDemoMode}</p>
+                        <img src="${data.data.image}" style="max-width: 300px; border: 1px solid #ccc;">
+                        <details>
+                            <summary>Generated Code</summary>
+                            <pre style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">${data.data.code}</pre>
+                        </details>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Network error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

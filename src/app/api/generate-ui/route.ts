@@ -80,54 +80,24 @@ export async function POST(request: NextRequest) {
     let base64Image = '';
     let generatedCode = '';
 
-    if (faairgoAIInitialized) {
-      console.log('🎨 Generating UI with FaairgoAI...');
+    // For now, use demo content since server-side FaairgoAI integration needs browser APIs
+    // TODO: Implement proper server-side FaairgoAI integration
+    console.log('🎨 Generating demo UI content (server-side FaairgoAI integration in development)');
 
-      try {
-        // Generate UI image using FaairgoAI
-        const imageResult = await generateUIWithFaairgoAI({
-          prompt: finalPrompt,
-          style,
-          size: '1024x1024'
-        });
-
-        if (imageResult) {
-          // Convert image to base64
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = imageResult.width || 1024;
-          canvas.height = imageResult.height || 1024;
-          ctx?.drawImage(imageResult, 0, 0);
-          base64Image = canvas.toDataURL('image/png');
-          console.log('✅ UI image generated successfully');
-        }
-
-        // Generate corresponding HTML/CSS code
-        const codePrompt = `Create a complete, functional ${platform} interface that matches the ${style} design style. ${type === 'textToUI' ? `Requirements: ${prompt}` : 'Based on the UI design provided.'}`;
-
-        const codeResult = await generateCodeWithFaairgoAI({
-          prompt: codePrompt,
-          language: 'typescript',
-          framework: 'react',
-          style
-        });
-
-        if (codeResult) {
-          generatedCode = codeResult;
-          console.log('✅ UI code generated successfully');
-        }
-
-      } catch (error) {
-        console.error('❌ FaairgoAI generation failed:', error);
-        // Fallback to demo content
-        base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
-        generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
-      }
-    } else {
-      console.log('⚠️ FaairgoAI not available, using demo content');
-      // Fallback to demo content
+    try {
+      // Generate demo content with enhanced details
       base64Image = generateDemoUIImage(style, platform, type, prompt || 'demo interface');
       generatedCode = getDemoCode(style, platform, prompt || 'demo interface');
+
+      console.log('✅ Demo UI content generated successfully');
+      console.log('📊 Image generated:', !!base64Image);
+      console.log('📊 Code length:', generatedCode.length);
+
+    } catch (error) {
+      console.error('❌ Demo content generation failed:', error);
+      // Minimal fallback
+      base64Image = 'data:image/svg+xml;base64,' + Buffer.from('<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="200" fill="#f0f0f0"/><text x="150" y="100" text-anchor="middle" fill="#666">UI Preview</text></svg>').toString('base64');
+      generatedCode = '<!-- Basic HTML template -->\n<html><body><h1>Generated UI</h1></body></html>';
     }
 
     console.log('✅ UI generation completed successfully');
@@ -234,7 +204,9 @@ function generateDemoUIImage(style: string, platform: string, type: string, prom
   </svg>`;
 
   return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
-} function getDemoCode(style: string, platform: string, prompt: string): string {
+}
+
+function getDemoCode(style: string, platform: string, prompt: string): string {
   const promptLower = prompt.toLowerCase();
 
   // Generate different content based on prompt keywords
