@@ -1,8 +1,17 @@
 /**
  * FaairgoAI Integration for FairForge
- * Complete AI-powered functionality using Puter.js backend
+ * Complete AI-powered functionality using Puter.js backend with fallback providers
  * Branded as FaairgoAI for user-facing experience
  */
+
+import {
+    generateWithGemini,
+    generateWithOpenRouter,
+    generateWithGrok,
+    generateWithPerplexity,
+    generateWithHuggingFace,
+    generateWithOpenAI
+} from './ai-providers';
 
 declare global {
     interface Window {
@@ -140,7 +149,40 @@ function generatePlaceholderUI(prompt: string): HTMLImageElement {
     img.src = URL.createObjectURL(blob);
 
     return img;
-} export interface FaairgoAIFile {
+}
+
+/**
+ * Try generating with fallback providers when Puter fails
+ */
+async function generateWithFallback(prompt: string, type: 'icon' | 'logo' | 'ui' = 'icon'): Promise<HTMLImageElement | null> {
+    const providers = [
+        { name: 'Gemini', func: generateWithGemini },
+        { name: 'OpenRouter', func: generateWithOpenRouter },
+        { name: 'Grok', func: generateWithGrok },
+        { name: 'Perplexity', func: generateWithPerplexity },
+        { name: 'HuggingFace', func: generateWithHuggingFace },
+        { name: 'OpenAI', func: generateWithOpenAI }
+    ];
+
+    for (const provider of providers) {
+        try {
+            console.log(`🔄 Trying ${provider.name} as fallback for ${type} generation...`);
+            const result = await provider.func(prompt);
+            if (result) {
+                console.log(`✅ ${provider.name} fallback successful!`);
+                return result;
+            }
+        } catch (error) {
+            console.log(`❌ ${provider.name} fallback failed:`, error);
+            continue;
+        }
+    }
+
+    console.log('🚫 All fallback providers failed, using placeholder');
+    return null;
+}
+
+export interface FaairgoAIFile {
     name: string;
     type: string;
     size: number;
@@ -515,8 +557,9 @@ export async function generateLogoWithFaairgoAI(prompt: string, style: string, t
         // First check if FaairgoAI is initialized
         const isInitialized = await initializeFaairgoAI();
         if (!isInitialized || !window.puter?.ai) {
-            console.log('📱 FaairgoAI service unavailable, using placeholder logo');
-            return generatePlaceholderLogo(prompt);
+            console.log('📱 FaairgoAI service unavailable, trying fallback providers...');
+            const fallbackResult = await generateWithFallback(prompt, 'logo');
+            return fallbackResult || generatePlaceholderLogo(prompt);
         }
 
         const stylePrompts = {
@@ -540,8 +583,9 @@ export async function generateLogoWithFaairgoAI(prompt: string, style: string, t
 
         return image;
     } catch (error) {
-        console.log('📱 FaairgoAI logo generation failed, using placeholder logo');
-        return generatePlaceholderLogo(prompt);
+        console.log('📱 FaairgoAI logo generation failed, trying fallback providers...');
+        const fallbackResult = await generateWithFallback(prompt, 'logo');
+        return fallbackResult || generatePlaceholderLogo(prompt);
     }
 }
 
@@ -553,8 +597,9 @@ export async function generateUIWithFaairgoAI(options: AIImageOptions): Promise<
         // First check if FaairgoAI is initialized
         const isInitialized = await initializeFaairgoAI();
         if (!isInitialized || !window.puter?.ai?.txt2img) {
-            console.log('📱 FaairgoAI service unavailable, using placeholder UI');
-            return generatePlaceholderUI(options.prompt);
+            console.log('📱 FaairgoAI service unavailable, trying fallback providers...');
+            const fallbackResult = await generateWithFallback(options.prompt, 'ui');
+            return fallbackResult || generatePlaceholderUI(options.prompt);
         }
 
         const { prompt, style = 'modern', size = '1024x1024' } = options;
@@ -582,8 +627,9 @@ export async function generateUIWithFaairgoAI(options: AIImageOptions): Promise<
         const image = await Promise.race([generationPromise, timeoutPromise]);
         return image;
     } catch (error) {
-        console.log('📱 FaairgoAI UI generation failed, using placeholder UI');
-        return generatePlaceholderUI(options.prompt);
+        console.log('📱 FaairgoAI UI generation failed, trying fallback providers...');
+        const fallbackResult = await generateWithFallback(options.prompt, 'ui');
+        return fallbackResult || generatePlaceholderUI(options.prompt);
     }
 }
 
@@ -633,8 +679,9 @@ export async function generateIconWithFaairgoAI(options: AIImageOptions): Promis
         // First check if FaairgoAI is initialized
         const isInitialized = await initializeFaairgoAI();
         if (!isInitialized || !window.puter?.ai?.txt2img) {
-            console.log('📱 FaairgoAI service unavailable, using placeholder icon');
-            return generatePlaceholderIcon(options.prompt);
+            console.log('📱 FaairgoAI service unavailable, trying fallback providers...');
+            const fallbackResult = await generateWithFallback(options.prompt, 'icon');
+            return fallbackResult || generatePlaceholderIcon(options.prompt);
         }
 
         const { prompt, style = 'modern', size = '512x512' } = options;
@@ -662,8 +709,9 @@ export async function generateIconWithFaairgoAI(options: AIImageOptions): Promis
         const image = await Promise.race([generationPromise, timeoutPromise]);
         return image;
     } catch (error) {
-        console.log('📱 FaairgoAI generation failed, using placeholder icon');
-        return generatePlaceholderIcon(options.prompt);
+        console.log('📱 FaairgoAI generation failed, trying fallback providers...');
+        const fallbackResult = await generateWithFallback(options.prompt, 'icon');
+        return fallbackResult || generatePlaceholderIcon(options.prompt);
     }
 }
 
